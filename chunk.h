@@ -1,0 +1,13 @@
+#ifndef CHUNK_H
+#define CHUNK_H
+
+typedef struct Chunk{
+	char *key_a;
+	char *key_b;
+	char *value;
+} Chunk;
+
+void ChunkGet(Chunk* chunk);
+void ChunkFreeContents(Chunk *chunk);
+
+#endif
