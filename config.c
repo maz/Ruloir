@@ -32,6 +32,7 @@ static struct ConfigKeyValue{
 	{"redisport",true,&Configuration.redis_port},
 	{"port",true,&Configuration.port},
 	{"securitytoken",false,&Configuration.security_token},
+	{"bind",false,&Configuration.bind},
 	{NULL}
 };
 

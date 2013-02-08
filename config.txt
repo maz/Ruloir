@@ -5,4 +5,4 @@ RedisPort:		6379
 
 Port:			8080
 SecurityToken:	ABCD 
-
+Bind:  0.0.0.0

@@ -1,6 +1,7 @@
 #include "prefix.h"
 #include "chunk.h"
 #include "config.h"
+#include "utils.h"
 
 //Help me Obi-Wan Kenobi...
 #define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
@@ -27,15 +28,13 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 	ConfigurationLoad(argv[1]);
+	int af;
+	size_t size;
+	char addr[SOCKADDR_SIZE]={0};
+	ParseAddr(Configuration.bind,Configuration.port,&af,&size,addr);
+	ONLY_HOPE_SET(serverfd=socket(af,SOCK_STREAM,0));
 	
-	struct sockaddr_in6 self;
-	ONLY_HOPE_SET(serverfd=socket(AF_INET6,SOCK_STREAM,0));
-	bzero(&self,sizeof(self));
-	self.sin6_family=AF_INET6;
-	self.sin6_port=htons(Configuration.port);
-	ONLY_HOPE(inet_pton(AF_INET6,Configuration.bind,&self.sin6_addr)!=1);
-	
-	ONLY_HOPE(bind(serverfd,(struct sockaddr*)&self,sizeof(self)));
+	ONLY_HOPE(bind(serverfd,(struct sockaddr*)addr,size));
 	ONLY_HOPE(listen(serverfd,Configuration.max_waiting_clients));
 	while(running){
 		int fd;
