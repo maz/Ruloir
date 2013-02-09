@@ -5,7 +5,7 @@
 
 //Help me Obi-Wan Kenobi...
 #define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
-#define ONLY_HOPE_SET(x)	ONLY_HOPE((x)<0)
+#define ONLY_HOPE_GTE0(x)	ONLY_HOPE((x)<0)
 
 #define CLIENT_QUEUE_LENGTH			(20)
 #define MAX_CHUNCK_CACHE_LENGTH		(20)
@@ -28,11 +28,9 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 	ConfigurationLoad(argv[1]);
-	int af;
 	size_t size;
-	char addr[SOCKADDR_SIZE]={0};
-	ParseAddr(Configuration.bind,Configuration.port,&af,&size,addr);
-	ONLY_HOPE_SET(serverfd=socket(af,SOCK_STREAM,0));
+	SOCKADDR addr;
+	ONLY_HOPE_GTE0(serverfd=SocketFromIP(Configuration.bind,Configuration.port,&size,addr));
 	
 	ONLY_HOPE(bind(serverfd,(struct sockaddr*)addr,size));
 	ONLY_HOPE(listen(serverfd,Configuration.max_waiting_clients));

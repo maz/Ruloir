@@ -22,3 +22,9 @@ void ParseAddr(const char *ip,int port,int *af,size_t *size,void* addr){
 		abort();
 	}
 }
+
+int SocketFromIP(const char *ip,int port,size_t *size,void* addr){
+	int af;
+	ParseAddr(ip,port,&af,size,addr);
+	return socket(af,SOCK_STREAM,0);
+}
