@@ -51,10 +51,3 @@ void ChunkGet(Chunk *chunk){
 	read(fd,buf,2);//read the \r\n
 	close(fd);
 }
-
-void ChunkFreeContents(Chunk *chunk){
-	free(chunk->key_a);
-	free(chunk->key_b);
-	free(chunk->value);
-	memset(chunk,0,sizeof(Chunk));
-}

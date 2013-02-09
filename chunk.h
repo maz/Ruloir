@@ -9,6 +9,5 @@ typedef struct Chunk{
 } Chunk;
 
 void ChunkGet(Chunk* chunk);
-void ChunkFreeContents(Chunk *chunk);
 
 #endif
