@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "config.h"
 #include "http-parser.h"
+#include "special-request.h"
 
 #define BAD_REQUEST		"HTTP/1.0 400 BAD REQUEST\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n400 Bad Request"
 
@@ -9,9 +10,9 @@ ClientHandler *client_handler_head=NULL;
 
 static void handle_client(ClientHandler *self,Client* client,HTTPRequest *http){
 	WriteStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
-	//Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
-	//write(client->fd,chunk->value,chunk->len);
-	write(client->fd,http->method,strlen(http->method));
+	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
+	write(client->fd,chunk->value,chunk->len);
+	//write(client->fd,http->method,strlen(http->method));
 }
 
 static void* client_handler(void* self_ptr){
@@ -22,11 +23,13 @@ static void* client_handler(void* self_ptr){
 		
 		for(unsigned int i=0;i<queue->idx;i++){
 			Client *client=&queue->clients[i];
-			if(HTTPParse(client->fd,&http))
-				handle_client(self,&queue->clients[i],&http);
-			else
-				WriteStr(client->fd,BAD_REQUEST);
-			close(client->fd);
+			if(!HandleSpecialClient(self,client)){
+				if(HTTPParse(client->fd,&http))
+					handle_client(self,&queue->clients[i],&http);
+				else
+					WriteStr(client->fd,BAD_REQUEST);
+				close(client->fd);
+			}
 		}
 		
 		//Switch active queue
@@ -38,6 +41,13 @@ static void* client_handler(void* self_ptr){
 	}
 	pthread_exit(NULL);
 	return NULL;
+}
+
+bool ClientHandlerEnqueueClient(ClientHandler *ch,Client *client){
+	pthread_mutex_lock(&ch->queue_handler_uses_lock);
+	bool completed=ClientQueueAdd(&ch->queues[!ch->queue_handler_uses],client);
+	pthread_mutex_unlock(&ch->queue_handler_uses_lock);
+	return completed;
 }
 
 ClientHandler *ClientHandlerNew(){

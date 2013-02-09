@@ -2,6 +2,7 @@
 #include "config.h"
 #include "utils.h"
 #include "client-handler.h"
+#include "special-request.h"
 
 //Help me Obi-Wan Kenobi...
 #define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
@@ -48,16 +49,15 @@ int main(int argc, char **argv){
 		read(fd,&buf,1);
 		if(buf=='\5'){
 			//This is a special request
-			//TODO: handle this specially
+			HandleSpecialRequest(&client_addr,fd);
+			continue;
 		}
 		Client client={.fd=fd,.first_char=buf,0};
 		
 		ClientHandler *ch=handler;
 		bool completed=false;
 		do{
-			pthread_mutex_lock(&ch->queue_handler_uses_lock);
-			completed=ClientQueueAdd(&ch->queues[!ch->queue_handler_uses],&client);
-			pthread_mutex_unlock(&ch->queue_handler_uses_lock);
+			completed=ClientHandlerEnqueueClient(ch,&client);
 			ch=handler->next;
 		}while(!completed && ch!=handler);
 		if(!completed){
@@ -65,9 +65,7 @@ int main(int argc, char **argv){
 			ch=ClientHandlerNew();
 			ch->next=buf;
 			handler->next=ch;
-			pthread_mutex_lock(&ch->queue_handler_uses_lock);
-			completed=ClientQueueAdd(&ch->queues[!ch->queue_handler_uses],&client);
-			pthread_mutex_unlock(&ch->queue_handler_uses_lock);
+			completed=ClientHandlerEnqueueClient(ch,&client);
 		}
 		handler=ch;
 	}

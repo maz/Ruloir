@@ -7,7 +7,9 @@
 typedef struct Client{
 	int fd;
 	char first_char;
-	char *force_update_key;
+	
+	char *force_update_key_a;
+	char *force_update_key_b;
 } Client;
 
 typedef struct ClientQueue{
@@ -32,5 +34,7 @@ ClientHandler *ClientHandlerNew();
 
 void ClientQueueInit(ClientQueue* queue);
 bool ClientQueueAdd(ClientQueue* queue,Client *client);
+
+bool ClientHandlerEnqueueClient(ClientHandler *ch,Client *client);
 
 #endif
