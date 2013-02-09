@@ -9,4 +9,6 @@ typedef char SOCKADDR[SOCKADDR_SIZE];
 void ParseAddr(const char *ip,int port,int *af,size_t *size,void* addr);
 int SocketFromIP(const char *ip,int port,size_t* size,void* addr);
 
+#define WriteStr(fd,str)	write(fd,str,(sizeof(str)/sizeof(char))-1)
+
 #endif

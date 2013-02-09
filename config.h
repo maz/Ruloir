@@ -11,6 +11,7 @@ struct RuloirConfiguration{
 	int redis_port;
 	int port;
 	int max_waiting_clients;
+	int client_queue_length;
 };
 extern struct RuloirConfiguration Configuration;
 

@@ -1,7 +1,7 @@
 #include "prefix.h"
-#include "chunk.h"
 #include "config.h"
 #include "utils.h"
+#include "client-handler.h"
 
 //Help me Obi-Wan Kenobi...
 #define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
@@ -29,23 +29,41 @@ int main(int argc, char **argv){
 	}
 	ConfigurationLoad(argv[1]);
 	
-	Chunk chunk={"person","name"};
-	ChunkGet(&chunk);
-	
 	size_t size;
 	SOCKADDR addr;
 	ONLY_HOPE_GTE0(serverfd=SocketFromIP(Configuration.bind,Configuration.port,&size,addr));
 	
 	ONLY_HOPE(bind(serverfd,(struct sockaddr*)addr,size));
 	ONLY_HOPE(listen(serverfd,Configuration.max_waiting_clients));
+	
+	client_handler_head=ClientHandlerNew();
+	ClientHandler *handler=client_handler_head;
 	while(running){
 		int fd;
 		struct sockaddr_in client_addr;
 		socklen_t addrlen=sizeof(client_addr);
 		fd=accept(serverfd,(struct sockaddr*)&client_addr,&addrlen);
 		
-		write(fd,chunk.value,chunk.len);
-		close(fd);
+		Client client={.fd=fd};
+		
+		ClientHandler *ch=handler;
+		bool completed=false;
+		do{
+			pthread_mutex_lock(&ch->queue_handler_uses_lock);
+			completed=ClientQueueAdd(&ch->queues[!ch->queue_handler_uses],&client);
+			pthread_mutex_unlock(&ch->queue_handler_uses_lock);
+			ch=handler->next;
+		}while(!completed && ch!=handler);
+		if(!completed){
+			ClientHandler *buf=handler->next;
+			ch=ClientHandlerNew();
+			ch->next=buf;
+			handler->next=ch;
+			pthread_mutex_lock(&ch->queue_handler_uses_lock);
+			completed=ClientQueueAdd(&ch->queues[!ch->queue_handler_uses],&client);
+			pthread_mutex_unlock(&ch->queue_handler_uses_lock);
+		}
+		handler=ch;
 	}
-	return 0;
+	exit(0);
 }

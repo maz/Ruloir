@@ -4,7 +4,6 @@
 #include "config.h"
 
 #define LENGTH_BUFFER_LENGTH	(7)
-#define WriteStr(fd,str)	write(fd,str,(sizeof(str)/sizeof(char))-1)
 
 static void write_param(int fd,const char *str){
 	WriteStr(fd,"$");
@@ -43,11 +42,17 @@ void ChunkGet(Chunk *chunk){
 	//assume we've hit the \r
 	read(fd,&ch,sizeof(char));//read the \n
 	chunk->len=atoi(buf);
-	chunk->value=malloc(chunk->len);
-	if(read(fd,chunk->value,chunk->len)!=chunk->len){
-		fprintf(stderr,"Unable to read needed bytes of chunk\n");
-		abort();
+	if(chunk->len>0){
+		//FOUND
+		chunk->value=malloc(chunk->len);
+		if(read(fd,chunk->value,chunk->len)!=chunk->len){
+			fprintf(stderr,"Unable to read needed bytes of chunk\n");
+			abort();
+		}
+		read(fd,buf,2);//read the \r\n
+	}else{
+		//NOT FOUND
+		chunk->value=NULL;
 	}
-	read(fd,buf,2);//read the \r\n
 	close(fd);
 }

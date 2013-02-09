@@ -7,7 +7,23 @@ struct RuloirConfiguration Configuration={
 	.redis_port=6379,
 	.port=8080,
 	.bind="::1",
-	.max_waiting_clients=20
+	.max_waiting_clients=20,
+	.client_queue_length=20
+};
+
+static struct ConfigKeyValue{
+	const char *key;
+	bool convert_to_int;
+	void* ptr;
+} config_keys_values[]={
+	{"systemid",false,&Configuration.system_id},
+	{"redisip",false,&Configuration.redis_ip},
+	{"redisport",true,&Configuration.redis_port},
+	{"port",true,&Configuration.port},
+	{"securitytoken",false,&Configuration.security_token},
+	{"bind",false,&Configuration.bind},
+	{"clientqueuelength",true,&Configuration.client_queue_length},
+	{NULL}
 };
 
 enum{
@@ -21,20 +37,6 @@ static void StrAppend(char** str,char ch){
 	(*str)[l+1]=0;
 	(*str)[l]=ch;
 }
-
-static struct ConfigKeyValue{
-	const char *key;
-	bool convert_to_int;
-	void* ptr;
-} config_keys_values[]={
-	{"systemid",false,&Configuration.system_id},
-	{"redisip",false,&Configuration.redis_ip},
-	{"redisport",true,&Configuration.redis_port},
-	{"port",true,&Configuration.port},
-	{"securitytoken",false,&Configuration.security_token},
-	{"bind",false,&Configuration.bind},
-	{NULL}
-};
 
 static void SetConfig(char *key,char *value){
 	size_t len=strlen(key);
