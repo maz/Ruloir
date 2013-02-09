@@ -13,6 +13,7 @@ typedef struct Client{
 typedef struct ClientQueue{
 	Client *clients;
 	volatile unsigned int idx;
+	pthread_mutex_t content_lock;
 } ClientQueue;
 
 typedef struct ClientHandler{
