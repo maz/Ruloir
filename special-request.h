@@ -6,6 +6,7 @@
 
 /*
 PROTOCOL: all commands are seven characters
+	\5
 	{security-token}, followed by <CR><LF>
 	{command: RELOAD-CACHE or LOAD-PROGRAM}, followed by <CR><LF>
 	if RELOAD-CACHE, key a, followed by <CR><LF>, key b, followed by <CR><LF>
