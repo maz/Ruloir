@@ -3,7 +3,7 @@
 #include "client-handler.h"
 #include "config.h"
 
-#define COMMAND_LENGTH		(7)
+#define COMMAND_LENGTH		(12)
 
 char* read_to_crlf(int fd){
 	char ch;
