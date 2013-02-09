@@ -1,6 +1,19 @@
 #include "utils.h"
 #include "prefix.h"
 
+void memswap(void* a,void* b,size_t sze){
+	unsigned char *x=a;
+	unsigned char *y=b;
+	while(sze){
+		unsigned char tmp=*x;
+		*x=*y;
+		*y=tmp;
+		++x;
+		++y;
+		sze--;
+	}
+}
+
 char* rulr_strdup(const char *x){
 	if(!x)
 		return NULL;

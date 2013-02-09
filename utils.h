@@ -15,4 +15,6 @@ char* rulr_strdup(const char *x);
 //strdup doesn't use jemalloc (or, more importantly, jemalloc's free)
 #define strdup(x)	rulr_strdup(x)
 
+void memswap(void* a,void* b,size_t sze);
+
 #endif
