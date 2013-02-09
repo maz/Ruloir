@@ -16,5 +16,6 @@ char* rulr_strdup(const char *x);
 #define strdup(x)	rulr_strdup(x)
 
 void memswap(void* a,void* b,size_t sze);
+bool streq(const char *a,const char *b);
 
 #endif

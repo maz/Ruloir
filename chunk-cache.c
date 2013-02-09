@@ -2,18 +2,6 @@
 #include "config.h"
 #include "utils.h"
 
-bool streq(const char *a,const char *b){
-	if(!a && !b)
-		return true;
-	if(!a || !b)
-		return false;
-	while(*a && *b && *a==*b){
-		++a;
-		++b;
-	}
-	return *a==*b;
-}
-
 Chunk* ChunkCacheGet(ChunkCache cache,const char *a,const char *b){
 	for(unsigned i=0;i<Configuration.chunk_cache_length;i++){
 		if(streq(cache[i].key_a,a) && streq(cache[i].key_b,b)){

@@ -1,6 +1,18 @@
 #include "utils.h"
 #include "prefix.h"
 
+bool streq(const char *a,const char *b){
+	if(!a && !b)
+		return true;
+	if(!a || !b)
+		return false;
+	while(*a && *b && *a==*b){
+		++a;
+		++b;
+	}
+	return *a==*b;
+}
+
 void memswap(void* a,void* b,size_t sze){
 	unsigned char *x=a;
 	unsigned char *y=b;
