@@ -53,14 +53,14 @@ bool HTTPParse(int fd,HTTPRequest *http){
 		return false;
 	}
 	do{
-		ch=read(fd,&ch,1);
+		read(fd,&ch,1);
 	}while(ch!=' ');
 	unsigned int i=0;
-	ch=read(fd,&ch,1);
+	read(fd,&ch,1);
 	while(i<MAX_HTTP_PATH_LENGTH && ch!=' '){
 		http->path[i]=ch;
 		i++;
-		ch=read(fd,&ch,1);
+		read(fd,&ch,1);
 	}
 	http->path[i]=0;
 	return true;
