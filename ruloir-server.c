@@ -44,7 +44,13 @@ int main(int argc, char **argv){
 		socklen_t addrlen=sizeof(client_addr);
 		fd=accept(serverfd,(struct sockaddr*)&client_addr,&addrlen);
 		
-		Client client={.fd=fd};
+		char buf;
+		read(fd,&buf,1);
+		if(buf=='\5'){
+			//This is a special request
+			//TODO: handle this specially
+		}
+		Client client={.fd=fd,.first_char=buf};
 		
 		ClientHandler *ch=handler;
 		bool completed=false;

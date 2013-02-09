@@ -1,21 +1,30 @@
 #include "client-handler.h"
 #include "utils.h"
 #include "config.h"
+#include "http-parser.h"
+
+#define BAD_REQUEST		"HTTP/1.0 400 BAD REQUEST\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n400 Bad Request"
 
 ClientHandler *client_handler_head=NULL;
 
-static void handle_client(ClientHandler *self,Client* client){
-	WriteStr(client->fd,"Hello!\n");
+static void handle_client(ClientHandler *self,Client* client,HTTPRequest *http){
+	WriteStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
+	write(client->fd,http->path,strlen(http->path));
 	close(client->fd);
 }
 
 static void* client_handler(void* self_ptr){
 	ClientHandler *self=self_ptr;
+	HTTPRequest http={0};
 	while(1){
 		ClientQueue *queue=&self->queues[self->queue_handler_uses];
 		
 		for(unsigned int i=0;i<queue->idx;i++){
-			handle_client(self,&queue->clients[i]);
+			Client *client=&queue->clients[i];
+			if(HTTPParse(client->fd,&http))
+				handle_client(self,&queue->clients[i],&http);
+			else
+				WriteStr(client->fd,BAD_REQUEST);
 		}
 		
 		//Switch active queue
