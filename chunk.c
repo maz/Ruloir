@@ -6,14 +6,14 @@
 #define LENGTH_BUFFER_LENGTH	(7)
 
 static void write_param(int fd,const char *str){
-	WriteStr(fd,"$");
+	WriteConstStr(fd,"$");
 	char buf[LENGTH_BUFFER_LENGTH]={0};//Longest Redis Key size is 512K
 	int len=strlen(str);
 	snprintf(buf,LENGTH_BUFFER_LENGTH,"%d",len);
 	write(fd,buf,strlen(buf));
-	WriteStr(fd,"\r\n");
+	WriteConstStr(fd,"\r\n");
 	write(fd,str,strlen(str));
-	WriteStr(fd,"\r\n");
+	WriteConstStr(fd,"\r\n");
 }
 
 void ChunkGet(Chunk *chunk){
@@ -22,11 +22,11 @@ void ChunkGet(Chunk *chunk){
 	int fd=SocketFromIP(Configuration.redis_ip,Configuration.redis_port,&size,&addr);
 	connect(fd,(struct sockaddr*)&addr,size);
 	if(chunk->key_b){
-		WriteStr(fd,"*3\r\n$4\r\nHGET\r\n");
+		WriteConstStr(fd,"*3\r\n$4\r\nHGET\r\n");
 		write_param(fd,chunk->key_a);
 		write_param(fd,chunk->key_b);
 	}else{
-		WriteStr(fd,"*2\r\n$3\r\nGET\r\n");
+		WriteConstStr(fd,"*2\r\n$3\r\nGET\r\n");
 		write_param(fd,chunk->key_a);
 	}
 	char ch;

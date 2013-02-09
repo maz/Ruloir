@@ -56,7 +56,7 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			free(b);
 		}
 	}else{
-		WriteStr(fd,"INVALID SECURITY TOKEN");
+		WriteConstStr(fd,"INVALID SECURITY TOKEN");
 	}
 	close(fd);
 }

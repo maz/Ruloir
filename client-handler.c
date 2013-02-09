@@ -9,7 +9,7 @@
 ClientHandler *client_handler_head=NULL;
 
 static void handle_client(ClientHandler *self,Client* client,HTTPRequest *http){
-	WriteStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
+	WriteConstStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
 	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
 	write(client->fd,chunk->value,chunk->len);
 	//write(client->fd,http->method,strlen(http->method));
@@ -27,7 +27,7 @@ static void* client_handler(void* self_ptr){
 				if(HTTPParse(client->fd,&http))
 					handle_client(self,&queue->clients[i],&http);
 				else
-					WriteStr(client->fd,BAD_REQUEST);
+					WriteConstStr(client->fd,BAD_REQUEST);
 				close(client->fd);
 			}
 		}
