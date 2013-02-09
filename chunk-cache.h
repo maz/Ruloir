@@ -6,6 +6,7 @@
 
 typedef Chunk* ChunkCache;
 
+bool ChunkCacheExists(ChunkCache cache,const char *key);
 Chunk* ChunkCacheGet(ChunkCache cache,const char *a,const char *b);
 Chunk* ChunkCacheLoadKey(ChunkCache cache,const char *a,const char *b);
 void ChunkCacheInit(ChunkCache *cache);

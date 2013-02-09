@@ -10,10 +10,10 @@ ClientHandler *client_handler_head=NULL;
 
 static void handle_client(ClientHandler *self,ClientNormalRequest* client,HTTPRequest *http){
 	WriteConstStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
+	write(client->fd,(ChunkCacheExists(self->cache,http->path+1)?"Y\n":"N\n"),2);
 	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
 	write(client->fd,chunk->value,chunk->len);
 	//write(client->fd,http->method,strlen(http->method));
-	//write(client->fd,(ChunkExists(http->path+1)?"Y":"N"),1);
 }
 
 static void* client_handler(void* self_ptr){

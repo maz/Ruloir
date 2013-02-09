@@ -2,6 +2,14 @@
 #include "config.h"
 #include "utils.h"
 
+bool ChunkCacheExists(ChunkCache cache,const char *key){
+	for(unsigned int i=0;i<Configuration.chunk_cache_length;i++){
+		if(streq(cache[i].key_a,key)){
+			return true;
+		}
+	}
+	return ChunkExists(key);
+}
 Chunk* ChunkCacheGet(ChunkCache cache,const char *a,const char *b){
 	for(unsigned i=0;i<Configuration.chunk_cache_length;i++){
 		if(streq(cache[i].key_a,a) && streq(cache[i].key_b,b)){
