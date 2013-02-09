@@ -52,7 +52,9 @@ int main(int argc, char **argv){
 			HandleSpecialRequest(&client_addr,fd);
 			continue;
 		}
-		Client client={.fd=fd,.first_char=buf,0};
+		Client client={.type=CLIENT_TYPE_REQUEST,0};
+		client.x.normal_request.fd=fd;
+		client.x.normal_request.first_char=buf;
 		
 		ClientHandler *ch=handler;
 		bool completed=false;

@@ -42,18 +42,20 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			}
 			ClientHandler *handler=client_handler_head;
 			do{
-				Client client={0};
-				client.force_update_key_a=strdup(a);
-				client.force_update_key_b=strdup(b);
+				Client client={.type=CLIENT_TYPE_FORCE_UPDATE};
+				client.x.force_update.key_a=strdup(a);
+				client.x.force_update.key_b=strdup(b);
 				if(!ClientHandlerEnqueueClient(handler,&client)){
-					free(client.force_update_key_a);
-					free(client.force_update_key_b);
+					free(client.x.force_update.key_a);
+					free(client.x.force_update.key_a);
 				}
 				//TODO: what do we do if the client's queue is full (aside from freeing the memory)?
 				handler=handler->next;
 			}while(handler!=client_handler_head);
 			free(a);
 			free(b);
+		}else{
+			WriteConstStr(fd,"COMMAND DOES NOT EXIST");
 		}
 	}else{
 		WriteConstStr(fd,"INVALID SECURITY TOKEN");
@@ -62,10 +64,10 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 }
 
 bool HandleSpecialClient(ClientHandler *handler,Client *client){
-	if(client->force_update_key_a){
-		ChunkCacheLoadKey(handler->cache,client->force_update_key_a,client->force_update_key_b);
-		free(client->force_update_key_a);
-		free(client->force_update_key_b);
+	if(client->type==CLIENT_TYPE_FORCE_UPDATE){
+		ChunkCacheLoadKey(handler->cache,client->x.force_update.key_a,client->x.force_update.key_b);
+		free(client->x.force_update.key_a);
+		free(client->x.force_update.key_b);
 		return true;
 	}else{
 		return false;

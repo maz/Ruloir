@@ -4,12 +4,25 @@
 #include "prefix.h"
 #include "chunk-cache.h"
 
-typedef struct Client{
+enum{
+	CLIENT_TYPE_REQUEST=0,
+	CLIENT_TYPE_FORCE_UPDATE
+};
+
+typedef struct ClientNormalRequest{
 	int fd;
 	char first_char;
-	
-	char *force_update_key_a;
-	char *force_update_key_b;
+} ClientNormalRequest;
+
+typedef struct Client{
+	char type;
+	union{
+		ClientNormalRequest normal_request;
+		struct{
+			char *key_a;
+			char *key_b;
+		} force_update;
+	} x;
 } Client;
 
 typedef struct ClientQueue{
