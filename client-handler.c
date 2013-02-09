@@ -26,6 +26,7 @@ static void* client_handler(void* self_ptr){
 				handle_client(self,&queue->clients[i],&http);
 			else
 				WriteStr(client->fd,BAD_REQUEST);
+			close(client->fd);
 		}
 		
 		//Switch active queue
