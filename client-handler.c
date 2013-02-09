@@ -13,6 +13,7 @@ static void handle_client(ClientHandler *self,ClientNormalRequest* client,HTTPRe
 	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
 	write(client->fd,chunk->value,chunk->len);
 	//write(client->fd,http->method,strlen(http->method));
+	//write(client->fd,(ChunkExists(http->path+1)?"Y":"N"),1);
 }
 
 static void* client_handler(void* self_ptr){

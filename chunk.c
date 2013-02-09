@@ -16,11 +16,16 @@ static void write_param(int fd,const char *str){
 	WriteConstStr(fd,"\r\n");
 }
 
-void ChunkGet(Chunk *chunk){
+static int RedisFd(){
 	SOCKADDR addr;
 	size_t size;
 	int fd=SocketFromIP(Configuration.redis_ip,Configuration.redis_port,&size,&addr);
 	connect(fd,(struct sockaddr*)&addr,size);
+	return fd;
+}
+
+void ChunkGet(Chunk *chunk){
+	int fd=RedisFd();
 	if(chunk->key_b){
 		WriteConstStr(fd,"*3\r\n$4\r\nHGET\r\n");
 		write_param(fd,chunk->key_a);
@@ -58,4 +63,15 @@ void ChunkGet(Chunk *chunk){
 		chunk->value=NULL;
 	}
 	close(fd);
+}
+
+bool ChunkExists(const char *key){
+	int fd=RedisFd();
+	WriteConstStr(fd,"*2\r\n$6\r\nEXISTS\r\n");
+	write_param(fd,key);
+	WriteConstStr(fd,"\r\n");
+	char buf[LENGTH_BUFFER_LENGTH+2];//+1 colon, +1 \0
+	read(fd,buf,LENGTH_BUFFER_LENGTH+2);
+	close(fd);
+	return atoi(buf+1)!=0;
 }
