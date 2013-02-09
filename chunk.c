@@ -45,9 +45,12 @@ void ChunkGet(Chunk *chunk){
 	if(chunk->len>0){
 		//FOUND
 		chunk->value=malloc(chunk->len);
-		if(read(fd,chunk->value,chunk->len)!=chunk->len){
-			fprintf(stderr,"Unable to read needed bytes of chunk\n");
-			abort();
+		char *ptr=chunk->value;
+		size_t bytes_read=0;
+		while(bytes_read<chunk->len){
+			size_t sze=read(fd,chunk->value,chunk->len);
+			bytes_read+=sze;
+			ptr+=sze;
 		}
 		read(fd,buf,2);//read the \r\n
 	}else{

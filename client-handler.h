@@ -2,10 +2,12 @@
 #define CLIENT_HANDLER_H
 
 #include "prefix.h"
+#include "chunk-cache.h"
 
 typedef struct Client{
 	int fd;
 	char first_char;
+	char *force_update_key;
 } Client;
 
 typedef struct ClientQueue{
@@ -19,6 +21,8 @@ typedef struct ClientHandler{
 	ClientQueue queues[2];
 	volatile char queue_handler_uses;
 	pthread_mutex_t queue_handler_uses_lock;
+	
+	ChunkCache cache;
 } ClientHandler;
 
 extern ClientHandler *client_handler_head;

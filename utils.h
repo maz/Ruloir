@@ -11,4 +11,8 @@ int SocketFromIP(const char *ip,int port,size_t* size,void* addr);
 
 #define WriteStr(fd,str)	write(fd,str,(sizeof(str)/sizeof(char))-1)
 
+char* rulr_strdup(const char *x);
+//strdup doesn't use jemalloc (or, more importantly, jemalloc's free)
+#define strdup(x)	rulr_strdup(x)
+
 #endif

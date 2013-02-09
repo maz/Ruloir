@@ -9,7 +9,8 @@ ClientHandler *client_handler_head=NULL;
 
 static void handle_client(ClientHandler *self,Client* client,HTTPRequest *http){
 	WriteStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
-	write(client->fd,http->path,strlen(http->path));
+	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
+	write(client->fd,chunk->value,chunk->len);
 	close(client->fd);
 }
 
@@ -45,6 +46,7 @@ ClientHandler *ClientHandlerNew(){
 	ClientQueueInit(&self->queues[1]);
 	pthread_mutex_init(&self->queue_handler_uses_lock,0);
 	pthread_create(&self->thread,0,client_handler,self);
+	ChunkCacheInit(&self->cache);
 	return self;
 }
 

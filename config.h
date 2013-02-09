@@ -12,6 +12,7 @@ struct RuloirConfiguration{
 	int port;
 	int max_waiting_clients;
 	int client_queue_length;
+	int chunk_cache_length;
 };
 extern struct RuloirConfiguration Configuration;
 

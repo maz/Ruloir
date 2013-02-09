@@ -1,6 +1,15 @@
 #include "utils.h"
 #include "prefix.h"
 
+char* rulr_strdup(const char *x){
+	if(!x)
+		return NULL;
+	size_t len=strlen(x)+1;
+	char *copy=malloc(len);
+	memcpy(copy,x,len);
+	return copy;
+}
+
 void ParseAddr(const char *ip,int port,int *af,size_t *size,void* addr){
 	struct in6_addr in6;
 	struct in_addr in4;

@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 			//This is a special request
 			//TODO: handle this specially
 		}
-		Client client={.fd=fd,.first_char=buf};
+		Client client={.fd=fd,.first_char=buf,0};
 		
 		ClientHandler *ch=handler;
 		bool completed=false;
