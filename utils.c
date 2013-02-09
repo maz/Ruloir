@@ -18,6 +18,7 @@ void ParseAddr(const char *ip,int port,int *af,size_t *size,void* addr){
 		((struct sockaddr_in6*)addr)->sin6_port=htons(port);
 		((struct sockaddr_in6*)addr)->sin6_addr=in6;
 	}else{
+		fprintf(stderr,"%s ; %d\n",ip,port);
 		perror("Unable to parse ip");
 		abort();
 	}

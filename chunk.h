@@ -4,6 +4,7 @@
 typedef struct Chunk{
 	char *key_a;
 	char *key_b;
+	int len;
 	char *value;
 } Chunk;
 

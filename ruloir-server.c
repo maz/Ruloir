@@ -28,6 +28,10 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 	ConfigurationLoad(argv[1]);
+	
+	Chunk chunk={"person","name"};
+	ChunkGet(&chunk);
+	
 	size_t size;
 	SOCKADDR addr;
 	ONLY_HOPE_GTE0(serverfd=SocketFromIP(Configuration.bind,Configuration.port,&size,addr));
@@ -40,8 +44,7 @@ int main(int argc, char **argv){
 		socklen_t addrlen=sizeof(client_addr);
 		fd=accept(serverfd,(struct sockaddr*)&client_addr,&addrlen);
 		
-		char buf[100];
-		write(fd,buf,read(fd,buf,100));
+		write(fd,chunk.value,chunk.len);
 		close(fd);
 	}
 	return 0;
