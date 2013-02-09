@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "config.h"
 
-#define LENGTH_BUFFER_LENGTH	(100)
+#define LENGTH_BUFFER_LENGTH	(7)
 #define WriteStr(fd,str)	write(fd,str,(sizeof(str)/sizeof(char))-1)
 
 static void write_param(int fd,const char *str){
