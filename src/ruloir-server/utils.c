@@ -1,6 +1,26 @@
 #include "utils.h"
 #include "prefix.h"
 
+//The following two functions are from: http://www.geekhideout.com/urlcode.shtml
+static inline char to_hex(char code) {
+  static const char hex[] = "0123456789abcdef";
+  return hex[code & 15];
+}
+char *urlencode(const char *pstr) {
+	char *buf = malloc(strlen(pstr) * 3 + 1), *pbuf = buf;
+	while (*pstr) {
+		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') 
+			*pbuf++ = *pstr;
+		else if (*pstr == ' ') 
+			*pbuf++ = '+';
+		else 
+			*pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
+		pstr++;
+	}
+	*pbuf = '\0';
+	return buf;
+}
+
 bool streq(const char *a,const char *b){
 	if(!a && !b)
 		return true;

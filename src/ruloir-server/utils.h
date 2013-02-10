@@ -19,5 +19,6 @@ char* rulr_strdup(const char *x);
 void memswap(void* a,void* b,size_t sze);
 bool streq(const char *a,const char *b);
 bool streq_ncs(const char *a,const char *b);
+char* urlencode(const char *x);
 
 #endif
