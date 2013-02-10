@@ -1,5 +1,6 @@
 #include "app.h"
 #include "utils.h"
+#include "chunk-cache.h"
 
 App* AppOpen(const char *file,char **err){
 	void *handle=dlopen(file,RTLD_NOW);
@@ -29,4 +30,13 @@ void AppRelease(App *app){
 		dlclose(app->handle);
 		free(app);
 	}
+}
+
+void AppChunkGet(void *ctx,const char *key_a,const char *key_b,const char **ptr,int *len){
+	Chunk *chunk=ChunkCacheGet(ctx,key_a,key_b);
+	*len=chunk->len;
+	*ptr=chunk->val;
+}
+bool AppChunkExists(void* ctx,const char *key){
+	return ChunkCacheExists(ctx,key);
 }
