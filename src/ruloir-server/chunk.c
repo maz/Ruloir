@@ -3,17 +3,21 @@
 #include "redis-chunk.h"
 #include "config.h"
 
-void (*ChunkGet)(Chunk* chunk);
-bool (*ChunkExists)(const char *key);
+void (*ChunkGet)(void*,Chunk* chunk);
+bool (*ChunkExists)(void*,const char *key);
+void* (*ChunkNewConnection)();
+void (*ChunkCloseConnection)(void*);
 
 struct ChunkBackend{
 	const char *name;
-	void (*ChunkGet)(Chunk* chunk);
-	bool (*ChunkExists)(const char *key);
+	void (*ChunkGet)(void*,Chunk* chunk);
+	bool (*ChunkExists)(void*,const char *key);
+	void* (*ChunkNewConnection)();
+	void (*ChunkCloseConnection)(void*);
 };
 
 static const struct ChunkBackend chunk_backends[]={
-	{"redis",RedisChunkGet,RedisChunkExists},
+	{"redis",RedisChunkGet,RedisChunkExists,RedisChunkNewConnection,RedisChunkCloseConnection},
 	{NULL}
 };
 
@@ -23,6 +27,8 @@ bool ChunkBackendLoad(){
 		if(streq_ncs(backend->name,Configuration.chunk_backend)){
 			ChunkGet=backend->ChunkGet;
 			ChunkExists=backend->ChunkExists;
+			ChunkNewConnection=backend->ChunkNewConnection;
+			ChunkCloseConnection=backend->ChunkCloseConnection;
 			return true;
 		}
 		++backend;

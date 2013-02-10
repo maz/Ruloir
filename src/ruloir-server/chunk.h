@@ -10,10 +10,12 @@ typedef struct Chunk{
 	char *value;
 } Chunk;
 
-extern void (*ChunkGet)(Chunk* chunk);
+extern void (*ChunkGet)(void*,Chunk* chunk);
 
 //This will take only the key_a part, the idea is not to check the existance of a particular entity with a certain ID, not to check it's validity and completeness
-extern bool (*ChunkExists)(const char *key);
+extern bool (*ChunkExists)(void*,const char *key);
+extern void* (*ChunkNewConnection)();
+extern void (*ChunkCloseConnection)(void*);
 
 bool ChunkBackendLoad();
 

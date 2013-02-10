@@ -4,7 +4,10 @@
 #include "prefix.h"
 #include "chunk.h"
 
-typedef Chunk* ChunkCache;
+typedef struct ChunkCache{
+	Chunk* chunks;
+	void *connection;
+} ChunkCache;
 
 bool ChunkCacheExists(ChunkCache cache,const char *key);
 Chunk* ChunkCacheGet(ChunkCache cache,const char *a,const char *b);

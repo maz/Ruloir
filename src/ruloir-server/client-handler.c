@@ -19,7 +19,7 @@ static void* client_handler(void* self_ptr){
 				ClientNormalRequest *client=&queue->clients[i].x.normal_request;
 				if(HTTPParse(client->fd,&http))
 					//handle_client(self,client,&http);
-					self->app->func(self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
+					self->app->func(&self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
 				else
 					WriteConstStr(client->fd,BAD_REQUEST);
 				close(client->fd);

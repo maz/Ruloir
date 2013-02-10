@@ -24,7 +24,7 @@ static int RedisFd(){
 	return fd;
 }
 
-void RedisChunkGet(Chunk *chunk){
+void RedisChunkGet(void* conn,Chunk *chunk){
 	int fd=RedisFd();
 	if(chunk->key_b){
 		WriteConstStr(fd,"*3\r\n$4\r\nHGET\r\n");
@@ -65,7 +65,7 @@ void RedisChunkGet(Chunk *chunk){
 	close(fd);
 }
 
-bool RedisChunkExists(const char *key){
+bool RedisChunkExists(void* conn,const char *key){
 	int fd=RedisFd();
 	WriteConstStr(fd,"*2\r\n$6\r\nEXISTS\r\n");
 	write_param(fd,key);
@@ -74,4 +74,12 @@ bool RedisChunkExists(const char *key){
 	read(fd,buf,LENGTH_BUFFER_LENGTH+2);
 	close(fd);
 	return atoi(buf+1)!=0;
+}
+
+
+void* RedisChunkNewConnection(){
+	return NULL;
+}
+void RedisChunkCloseConnection(void* conn){
+	
 }

@@ -3,7 +3,9 @@
 
 #include "chunk.h"
 
-void RedisChunkGet(Chunk *chunk);
-bool RedisChunkExists(const char *key);
+void RedisChunkGet(void*,Chunk *chunk);
+bool RedisChunkExists(void*,const char *key);
+void* RedisChunkNewConnection();
+void RedisChunkCloseConnection(void*);
 
 #endif
