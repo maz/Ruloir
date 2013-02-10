@@ -13,6 +13,7 @@ int SocketFromIP(const char *ip,int port,size_t* size,void* addr);
 
 char* rulr_strdup(const char *x);
 //strdup doesn't use jemalloc (or, more importantly, jemalloc's free)
+#undef strdup
 #define strdup(x)	rulr_strdup(x)
 
 void memswap(void* a,void* b,size_t sze);

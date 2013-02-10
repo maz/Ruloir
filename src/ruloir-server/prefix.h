@@ -18,4 +18,6 @@
 #include <jemalloc/jemalloc.h>
 #include <pthread.h>
 
+#define strdup(...)	CSTDLIB_STRDUP_IS_DEPRECATED()
+
 #endif

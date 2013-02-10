@@ -1,5 +1,6 @@
 #include "config.h"
 #include "prefix.h"
+#include "utils.h"
 
 struct RuloirConfiguration Configuration={
 	.system_id="SYSID",
