@@ -7,7 +7,8 @@
 
 enum{
 	CLIENT_TYPE_REQUEST=0,
-	CLIENT_TYPE_FORCE_UPDATE
+	CLIENT_TYPE_FORCE_UPDATE,
+	CLIENT_TYPE_LOAD_PROGRAM
 };
 
 typedef struct ClientNormalRequest{
@@ -23,6 +24,7 @@ typedef struct Client{
 			char *key_a;
 			char *key_b;
 		} force_update;
+		App* load_program;
 	} x;
 } Client;
 
