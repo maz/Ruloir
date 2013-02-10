@@ -35,7 +35,7 @@ void AppRelease(App *app){
 void AppChunkGet(void *ctx,const char *key_a,const char *key_b,const char **ptr,int *len){
 	Chunk *chunk=ChunkCacheGet(ctx,key_a,key_b);
 	*len=chunk->len;
-	*ptr=chunk->val;
+	*ptr=chunk->value;
 }
 bool AppChunkExists(void* ctx,const char *key){
 	return ChunkCacheExists(ctx,key);
