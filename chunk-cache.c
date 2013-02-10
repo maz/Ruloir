@@ -29,6 +29,7 @@ Chunk* ChunkCacheLoadKey(ChunkCache cache,const char *a,const char *b){
 			LOAD_CACHE();
 		}
 	}
+	//TODO: make a better caching precedence algorthim that ensures that no requested chunks get freed until the end of the request
 	i=Configuration.chunk_cache_length-1;
 	free(cache[i].key_a);
 	free(cache[i].key_b);
