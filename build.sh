@@ -10,4 +10,4 @@ fi
 CFLAGS="-I/usr/local/include -DREENTRANT"
 LDFLAGS="-L/usr/local/lib -ljemalloc -pthread"
 
-$CC -g -o ruloir-server $CFLAGS $LDFLAGS *.c
+$CC -g -o bin/ruloir-server $CFLAGS $LDFLAGS src/ruloir-server/*.c
