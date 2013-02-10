@@ -17,7 +17,10 @@
 #define JEMALLOC_MANGLE		1
 #include <jemalloc/jemalloc.h>
 #include <pthread.h>
+#ifdef MONGO_CLIENT_INSTEALLED
+#include <mongo.h>
+#endif
 
-#define strdup(...)	CSTDLIB_STRDUP_IS_DEPRECATED()
+#define strdup(...)	CSTDLIB_STRDUP_IS_DANGEROUS_DUE_TO_JEMALLOC()
 
 #endif

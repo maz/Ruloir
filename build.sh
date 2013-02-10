@@ -7,8 +7,16 @@ if [ -z $CC ]; then
 	fi
 fi
 
-CFLAGS="-I/usr/local/include -DREENTRANT"
-LDFLAGS="-L/usr/local/lib -ljemalloc -pthread"
+if [ -f /usr/local/include/mongo.h ]; then
+	CFLAGS="$CFLAGS -I/usr/local/include -DMONGO_CLIENT_INSTALLED"
+	LDFLAGS="$LDFLAGS -L/usr/local/include -lbson -lmongoc"
+elif  [ -f /usr/include/mongo.h ]; then
+	CFLAGS="$CFLAGS -I/usr/include -DMONGO_CLIENT_INSTALLED"
+	LDFLAGS="$LDFLAGS -L/usr/include -lbson -lmongoc"
+fi
+
+CFLAGS="$CFLAGS -I/usr/local/include -DREENTRANT"
+LDFLAGS="$LDFLAGS -L/usr/local/lib -ljemalloc -pthread"
 
 $CC -g -o bin/ruloir-server $CFLAGS $LDFLAGS src/ruloir-server/*.c &&	\
 $CC -g -o bin/default-app.so -Isrc $CFLAGS $LDFLAGS -fPIC -shared src/default-app/default-app.c && \

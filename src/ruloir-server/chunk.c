@@ -1,6 +1,7 @@
 #include "chunk.h"
 #include "utils.h"
 #include "redis-chunk.h"
+#include "mongo-chunk.h"
 #include "config.h"
 
 void (*ChunkGet)(void*,Chunk* chunk);
@@ -18,6 +19,9 @@ struct ChunkBackend{
 
 static const struct ChunkBackend chunk_backends[]={
 	{"redis",RedisChunkGet,RedisChunkExists,RedisChunkNewConnection,RedisChunkCloseConnection},
+	#ifdef MONGO_CLIENT_INSTALLED
+	{"mongo",MongoChunkGet,MongoChunkExists,MongoChunkNewConnection,MongoChunkCloseConnection},
+	#endif
 	{NULL}
 };
 
