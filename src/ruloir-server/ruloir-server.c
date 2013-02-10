@@ -30,6 +30,13 @@ int main(int argc, char **argv){
 	}
 	ConfigurationLoad(argv[1]);
 	
+	char *err;
+	App *app=AppOpen(Configuration.app_path,&err);
+	if(!app){
+		fprintf(stderr,"Unable to open app at path '%s'\n\t%s\n",Configuration.app_path,err);
+		exit(1);
+	}
+	
 	size_t size;
 	SOCKADDR addr;
 	ONLY_HOPE_GTE0(serverfd=SocketFromIP(Configuration.bind,Configuration.port,&size,addr));
@@ -39,6 +46,7 @@ int main(int argc, char **argv){
 	
 	client_handler_head=ClientHandlerNew();
 	ClientHandler *handler=client_handler_head;
+	ClientHandlerSetApp(handler,app);
 	while(running){
 		int fd;
 		struct sockaddr_in client_addr;
@@ -65,11 +73,14 @@ int main(int argc, char **argv){
 		if(!completed){
 			ClientHandler *buf=handler->next;
 			ch=ClientHandlerNew();
+			ClientHandlerSetApp(ch,app);
 			ch->next=buf;
 			handler->next=ch;
 			completed=ClientHandlerEnqueueClient(ch,&client);
 		}
 		handler=ch;
 	}
+	if(app)
+		dlclose(app->handle);
 	exit(0);
 }

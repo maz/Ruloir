@@ -8,6 +8,7 @@ struct RuloirConfiguration{
 	const char *redis_ip;
 	const char *security_token;
 	const char *bind;
+	const char *app_path;
 	int redis_port;
 	int port;
 	int max_waiting_clients;

@@ -3,6 +3,7 @@
 
 #include "prefix.h"
 #include "chunk-cache.h"
+#include "app.h"
 
 enum{
 	CLIENT_TYPE_REQUEST=0,
@@ -39,15 +40,16 @@ typedef struct ClientHandler{
 	pthread_mutex_t queue_handler_uses_lock;
 	
 	ChunkCache cache;
+	App *app;
 } ClientHandler;
 
 extern ClientHandler *client_handler_head;
 
 ClientHandler *ClientHandlerNew();
+bool ClientHandlerEnqueueClient(ClientHandler *ch,Client *client);
+void ClientHandlerSetApp(ClientHandler *self,App *app);
 
 void ClientQueueInit(ClientQueue* queue);
 bool ClientQueueAdd(ClientQueue* queue,Client *client);
-
-bool ClientHandlerEnqueueClient(ClientHandler *ch,Client *client);
 
 #endif

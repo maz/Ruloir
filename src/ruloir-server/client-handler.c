@@ -8,14 +8,6 @@
 
 ClientHandler *client_handler_head=NULL;
 
-static void handle_client(ClientHandler *self,ClientNormalRequest* client,HTTPRequest *http){
-	WriteConstStr(client->fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
-	write(client->fd,(ChunkCacheExists(self->cache,http->path+1)?"Y\n":"N\n"),2);
-	Chunk *chunk=ChunkCacheGet(self->cache,http->path+1,NULL);
-	write(client->fd,chunk->value,chunk->len);
-	//write(client->fd,http->method,strlen(http->method));
-}
-
 static void* client_handler(void* self_ptr){
 	ClientHandler *self=self_ptr;
 	HTTPRequest http={0};
@@ -26,7 +18,8 @@ static void* client_handler(void* self_ptr){
 			if(!HandleSpecialClient(self,&queue->clients[i])){
 				ClientNormalRequest *client=&queue->clients[i].x.normal_request;
 				if(HTTPParse(client->fd,&http))
-					handle_client(self,client,&http);
+					//handle_client(self,client,&http);
+					self->app->func(self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
 				else
 					WriteConstStr(client->fd,BAD_REQUEST);
 				close(client->fd);
@@ -55,12 +48,20 @@ ClientHandler *ClientHandlerNew(){
 	ClientHandler *self=malloc(sizeof(ClientHandler));
 	self->next=self;
 	self->queue_handler_uses=0;
+	self->app=NULL;
 	ClientQueueInit(&self->queues[0]);
 	ClientQueueInit(&self->queues[1]);
 	pthread_mutex_init(&self->queue_handler_uses_lock,0);
 	pthread_create(&self->thread,0,client_handler,self);
 	ChunkCacheInit(&self->cache);
 	return self;
+}
+
+void ClientHandlerSetApp(ClientHandler *self,App *app){
+	if(self->app){
+		AppRelease(self->app);
+	}
+	self->app=AppRetain(app);
 }
 
 void ClientQueueInit(ClientQueue* queue){
