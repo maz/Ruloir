@@ -1,6 +1,8 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 
+#include "prefix.h"
+
 typedef struct Chunk{
 	char *key_a;
 	char *key_b;
@@ -8,9 +10,11 @@ typedef struct Chunk{
 	char *value;
 } Chunk;
 
-void ChunkGet(Chunk* chunk);
+extern void (*ChunkGet)(Chunk* chunk);
 
 //This will take only the key_a part, the idea is not to check the existance of a particular entity with a certain ID, not to check it's validity and completeness
-bool ChunkExists(const char *key);
+extern bool (*ChunkExists)(const char *key);
+
+bool ChunkBackendLoad();
 
 #endif

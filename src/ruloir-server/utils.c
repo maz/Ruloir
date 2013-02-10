@@ -13,6 +13,18 @@ bool streq(const char *a,const char *b){
 	return *a==*b;
 }
 
+bool streq_ncs(const char *a,const char *b){
+	if(!a && !b)
+		return true;
+	if(!a || !b)
+		return false;
+	while(*a && *b && tolower(*a)==tolower(*b)){
+		++a;
+		++b;
+	}
+	return *a==*b;
+}
+
 void memswap(void* a,void* b,size_t sze){
 	unsigned char *x=a;
 	unsigned char *y=b;

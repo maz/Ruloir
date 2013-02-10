@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "client-handler.h"
 #include "special-request.h"
+#include "chunk.h"
 
 //Help me Obi-Wan Kenobi...
 #define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
@@ -29,6 +30,8 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 	ConfigurationLoad(argv[1]);
+	
+	ONLY_HOPE(!ChunkBackendLoad());
 	
 	char *err;
 	App *app=AppOpen(Configuration.app_path,&err);

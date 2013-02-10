@@ -9,6 +9,7 @@ struct RuloirConfiguration{
 	const char *security_token;
 	const char *bind;
 	const char *app_path;
+	const char *chunk_backend;
 	int redis_port;
 	int port;
 	int max_waiting_clients;

@@ -11,7 +11,8 @@ struct RuloirConfiguration Configuration={
 	.max_waiting_clients=20,
 	.client_queue_length=20,
 	.chunk_cache_length=20,
-	.app_path="default-app"
+	.app_path="default-app",
+	.chunk_backend="redis"
 };
 
 static struct ConfigKeyValue{
@@ -28,6 +29,7 @@ static struct ConfigKeyValue{
 	{"clientqueuelength",true,&Configuration.client_queue_length},
 	{"chunkcachelength",true,&Configuration.chunk_cache_length},
 	{"apppath",false,&Configuration.app_path},
+	{"chunkbackend",false,&Configuration.chunk_backend},
 	{NULL}
 };
 
