@@ -62,6 +62,10 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			char *str=read_to_crlf(fd);
 			int len=atoi(str);
 			free(str);
+			if(!len){
+				close(fd);
+				return;
+			}
 			uint32_t crc_buf=CRC32InitialValue;
 			uint32_t crc;
 			size_t sze=strlen(Configuration.app_path);
