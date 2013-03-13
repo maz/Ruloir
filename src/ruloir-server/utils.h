@@ -21,4 +21,6 @@ bool streq(const char *a,const char *b);
 bool streq_ncs(const char *a,const char *b);
 char* urlencode(const char *x);
 
+#define STRERROR_MAX_LENGTH		(256)
+
 #endif

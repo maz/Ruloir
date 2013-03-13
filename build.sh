@@ -1,11 +1,15 @@
 #!/bin/sh
+mkdir -p bin
+
 if [ -z $CC ]; then
-	if which clang >> /dev/null; then
+	if which clang >> /dev/null 2> /dev/null; then
 		CC="/usr/bin/env clang"
 	else
 		CC="/usr/bin/env gcc"
 	fi
 fi
+
+CFLAGS="$CFLAGS -std=c99"
 
 if [ -f /usr/local/include/mongo.h ]; then
 	CFLAGS="$CFLAGS -I/usr/local/include -DMONGO_CLIENT_INSTALLED"
@@ -16,7 +20,7 @@ elif  [ -f /usr/include/mongo.h ]; then
 fi
 
 CFLAGS="$CFLAGS -I/usr/local/include -DREENTRANT"
-LDFLAGS="$LDFLAGS -L/usr/local/lib -ljemalloc -pthread"
+LDFLAGS="$LDFLAGS -L/usr/local/lib -ljemalloc -pthread -ldl"
 
 $CC -g -o bin/ruloir-server $CFLAGS $LDFLAGS src/ruloir-server/*.c &&	\
 $CC -g -o bin/default-app.so -Isrc $CFLAGS $LDFLAGS -fPIC -shared src/default-app/default-app.c && \

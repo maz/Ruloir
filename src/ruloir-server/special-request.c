@@ -122,8 +122,8 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 				}
 			}else{
 				WriteConstStr(fd,"FILE-ERROR\r\n");
-				char *buf=calloc(sys_nerr,1);
-				strerror_r(errno,buf,sys_nerr);
+				char *buf=calloc(STRERROR_MAX_LENGTH,1);
+				strerror_r(errno,buf,STRERROR_MAX_LENGTH);
 				write(fd,buf,strlen(buf));
 				WriteConstStr(fd,"\r\n");
 				free(buf);
