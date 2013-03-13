@@ -4,17 +4,10 @@
 #include "prefix.h"
 
 struct RuloirConfiguration{
-	const char *system_id;
-	const char *redis_ip;
-	const char *security_token;
-	const char *bind;
-	const char *app_path;
-	const char *chunk_backend;
-	int redis_port;
-	int port;
-	int max_waiting_clients;
-	int client_queue_length;
-	int chunk_cache_length;
+#define CONFIG(key,is_int,type,name,default)	type name;
+	#include "config-keys.h"
+#undef CONFIG
+	char overflow;
 };
 extern struct RuloirConfiguration Configuration;
 

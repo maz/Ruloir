@@ -3,16 +3,10 @@
 #include "utils.h"
 
 struct RuloirConfiguration Configuration={
-	.system_id="SYSID",
-	.redis_ip="localhost",
-	.redis_port=6379,
-	.port=8080,
-	.bind="::1",
-	.max_waiting_clients=20,
-	.client_queue_length=20,
-	.chunk_cache_length=20,
-	.app_path="default-app",
-	.chunk_backend="redis"
+#define CONFIG(key,is_int,type,name,default)	.name = default ,
+	#include "config-keys.h"
+#undef CONFIG
+	0
 };
 
 static struct ConfigKeyValue{
@@ -20,16 +14,9 @@ static struct ConfigKeyValue{
 	bool convert_to_int;
 	void* ptr;
 } config_keys_values[]={
-	{"systemid",false,&Configuration.system_id},
-	{"redisip",false,&Configuration.redis_ip},
-	{"redisport",true,&Configuration.redis_port},
-	{"port",true,&Configuration.port},
-	{"securitytoken",false,&Configuration.security_token},
-	{"bind",false,&Configuration.bind},
-	{"clientqueuelength",true,&Configuration.client_queue_length},
-	{"chunkcachelength",true,&Configuration.chunk_cache_length},
-	{"apppath",false,&Configuration.app_path},
-	{"chunkbackend",false,&Configuration.chunk_backend},
+#define CONFIG(key,is_int,type,name,default)	{ key, is_int, &Configuration.name },
+	#include "config-keys.h"
+#undef CONFIG
 	{NULL}
 };
 
