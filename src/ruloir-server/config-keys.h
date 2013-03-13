@@ -12,3 +12,11 @@ CONFIG("maxwaitingclients",true,int,max_waiting_clients,20)
 CONFIG("clientqueuelength",true,int,client_queue_length,20)
 CONFIG("chunkcachelength",true,int,chunk_cache_length,20)
 
+#ifdef MONGO_CLIENT_INSTALLED
+	CONFIG("mongotimeout",true,int,mongo_timeout,1000)
+	CONFIG("mongoserver",false,const char*,mongo_server,"127.0.0.1")
+	CONFIG("mongoport",true,int,mongo_port,27017)
+	CONFIG("mongocollection",false,const char*,mongo_db,"test.ruloir")
+	CONFIG("mongokeyfield",false,const char*,mongo_key_field,"key")
+	CONFIG("mongovaluefield",false,const char*,mongo_value_field,"value")
+#endif
