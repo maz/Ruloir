@@ -17,7 +17,7 @@
 #define JEMALLOC_MANGLE		1
 #include <jemalloc/jemalloc.h>
 #include <pthread.h>
-#ifdef MONGO_CLIENT_INSTEALLED
+#ifdef MONGO_CLIENT_INSTALLED
 #include <mongo.h>
 #endif
 

@@ -1,6 +1,11 @@
 #include "mongo-chunk.h"
+#include "config.h"
 
 #ifdef MONGO_CLIENT_INSTALLED
+
+#ifndef MONGO_H_
+#error Mongo client header cannot be accessed
+#endif
 
 void MongoChunkGet(void* conn, Chunk *chunk){
 	bson query[1];
@@ -10,7 +15,7 @@ void MongoChunkGet(void* conn, Chunk *chunk){
 	mongo_cursor cursor[1];
 	
 	bson_init(query);
-		bson_append_string(query, Configuration.mongo_key, chunk.key);
+		bson_append_string(query, Configuration.mongo_key_field, chunk->key_a);
 	bson_finish(query);
 	
 	bson_destroy(query);
