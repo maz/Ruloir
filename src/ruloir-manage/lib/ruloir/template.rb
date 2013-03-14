@@ -8,19 +8,23 @@ module Ruloir
     def self.parse_file(file)
       self.parse(File.read(file))
     end
-    def self.parse(code)
+    def self.parse(code, name=nil)
       self.new(
         code.split(DYNAMIC_REGEX_NO_GROUPS),
         code.scan(DYNAMIC_REGEX_GROUPS).map {|x|
           (x.last==x.first) ? [x.first] : [x.first, x.last]
-        }
+        },
+        name||Digest::MD5.hexdigest(code)
       )
     end
     
-    def initialize(static_chunks, dynamic_chunks)
+    def initialize(static_chunks, dynamic_chunks, name)
       @static_chunks=static_chunks
       @dynamic_chunks=dynamic_chunks
+      @name=name
     end
+    
+    attr_reader :name
     
     def c_code
       code="int *len; const char* data;\n"
