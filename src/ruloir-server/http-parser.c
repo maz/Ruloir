@@ -1,10 +1,12 @@
 #include "http-parser.h"
+#include "char-buffer.h"
 #include "prefix.h"
 
-#define READ_CH()		({read(fd,&ch,1);ch=toupper(ch);})
+#define READ_CH()		({ch=toupper(CharBufferRead(fd,&char_buf));})
 
 bool HTTPParse(int fd,HTTPRequest *http){
 	char ch;
+	CharBuffer char_buf=CHAR_BUFFER_INITIALIZER;
 	READ_CH();
 	switch(ch){
 	case 'E':
@@ -53,14 +55,14 @@ bool HTTPParse(int fd,HTTPRequest *http){
 		return false;
 	}
 	do{
-		read(fd,&ch,1);
+		ch=CharBufferRead(fd,&char_buf);
 	}while(ch!=' ');
 	unsigned int i=0;
-	read(fd,&ch,1);
+	ch=CharBufferRead(fd,&char_buf);
 	while(i<MAX_HTTP_PATH_LENGTH && ch!=' '){
 		http->path[i]=ch;
 		i++;
-		read(fd,&ch,1);
+		ch=CharBufferRead(fd,&char_buf);
 	}
 	http->path[i]=0;
 	return true;
