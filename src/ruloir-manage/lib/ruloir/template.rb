@@ -23,7 +23,7 @@ module Ruloir
     end
     
     def c_code
-      code="int *len; const char* data;"
+      code="int *len; const char* data;\n"
       
       digest=chunk_digest
       
