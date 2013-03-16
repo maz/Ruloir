@@ -31,7 +31,7 @@ static void SendMethod(int fd, const char *method,const char *key_a, const char*
 static bool recieved_200(int fd, CharBuffer *buf){
 	char ch;
 	do{
-		CharBufferRead(fd,buf);
+		ch=CharBufferRead(fd,buf);
 	}while(ch!=' ');
 	return ((CharBufferRead(fd,buf)=='2') && (CharBufferRead(fd,buf)=='0') && (CharBufferRead(fd,buf)=='0'));
 }
@@ -84,6 +84,7 @@ void HTTPChunkGet(void* ctx,Chunk *chunk){
 				while(ch!='\r'){
 					chunk->len*=10;
 					chunk->len+=VALUE_OF_DIGIT(ch);
+					ch=CharBufferRead(fd, &buf);
 				}
 				CharBufferRead(fd, &buf);//read \n
 			}else{
