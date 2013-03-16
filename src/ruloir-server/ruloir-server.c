@@ -34,7 +34,6 @@ int main(int argc, char **argv){
 	if(num_cpus>0){
 		Configuration.default_handler_threads=num_cpus;
 	}
-	printf("%d\n",Configuration.default_handler_threads);
 	
 	ConfigurationLoad(argv[1]);
 	
