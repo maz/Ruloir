@@ -2,6 +2,7 @@
 #include "redis-chunk.h"
 #include "utils.h"
 #include "config.h"
+#include "char-buffer.h"
 
 #define LENGTH_BUFFER_LENGTH	(7)
 
@@ -34,30 +35,25 @@ void RedisChunkGet(void* conn,Chunk *chunk){
 		WriteConstStr(fd,"*2\r\n$3\r\nGET\r\n");
 		write_param(fd,chunk->key_a);
 	}
+	CharBuffer char_buf=CHAR_BUFFER_INITIALIZER;
 	char ch;
-	read(fd,&ch,sizeof(char));
+	ch=CharBufferRead(fd,&char_buf);
 	char buf[LENGTH_BUFFER_LENGTH]={0};
 	char i=0;
-	read(fd,&ch,sizeof(char));
+	ch=CharBufferRead(fd,&char_buf);
 	while(i<LENGTH_BUFFER_LENGTH && ch!='\r'){
 		buf[i]=ch;
-		read(fd,&ch,sizeof(char));
+		ch=CharBufferRead(fd,&char_buf);
 		++i;
 	}
 	//assume we've hit the \r
-	read(fd,&ch,sizeof(char));//read the \n
+	ch=CharBufferRead(fd,&char_buf);//read the \n
 	chunk->len=atoi(buf);
 	if(chunk->len>0){
 		//FOUND
 		chunk->value=malloc(chunk->len);
-		char *ptr=chunk->value;
-		size_t bytes_read=0;
-		while(bytes_read<chunk->len){
-			size_t sze=read(fd,chunk->value,chunk->len);
-			bytes_read+=sze;
-			ptr+=sze;
-		}
-		read(fd,buf,2);//read the \r\n
+		CharBufferReadMany(fd, &char_buf, chunk->len, chunk->value);
+		CharBufferReadMany(fd, &char_buf, 2, buf);//read the \r\n
 	}else{
 		//NOT FOUND
 		chunk->value=NULL;
