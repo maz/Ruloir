@@ -12,6 +12,11 @@ void AppFunc(void* ctx,
 	WriteConstStr(fd,"HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n");
 	const char *data;
 	int len;
-	ChunkGet(ctx,path+1,NULL,&data,&len);
-	write(fd,data,len);
+	//ChunkGet(ctx,path+1,NULL,&data,&len);
+	//write(fd,data,len);
+	if(ChunkExists(ctx,path+1)){
+		WriteConstStr(fd, "true");
+	}else{
+		WriteConstStr(fd, "false");
+	}
 }

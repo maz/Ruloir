@@ -22,7 +22,8 @@ static struct ConfigKeyValue{
 
 enum{
 	CONFIG_STATE_KEY=1,
-	CONFIG_STATE_VALUE
+	CONFIG_STATE_VALUE,
+	CONFIG_STATE_COMMENT
 };
 
 static void StrAppend(char** str,char ch){
@@ -98,6 +99,8 @@ void ConfigurationLoad(const char *config_file){
 		if(ch=='\n'){
 			SET_CONFIGURATION_VALUE();
 			state=CONFIG_STATE_KEY;
+		}else if(ch=='#'){
+			state=CONFIG_STATE_COMMENT;
 		}else if(state==CONFIG_STATE_KEY){
 			if(ch==':'){
 				state=CONFIG_STATE_VALUE;
