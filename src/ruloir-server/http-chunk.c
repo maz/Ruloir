@@ -19,7 +19,7 @@ static void SendMethod(int fd, const char *method,const char *key_a, const char*
 	write(fd,enc,strlen(enc));
 	free(enc);
 	if(key_b){
-		write(fd,Configuration.http_path.delimeter,strlen(Configuration.http_path_delimeter));
+		write(fd,Configuration.http_path_delimeter,strlen(Configuration.http_path_delimeter));
 		enc=urlencode(key_b);
 		write(fd,enc,strlen(enc));
 		free(enc);
@@ -66,4 +66,4 @@ bool HTTPChunkExists(void* ctx,const char *key){
 	return result;
 }
 void* HTTPChunkNewConnection(){return NULL;}
-void HTTPChunkCloseConnection(void*){}
+void HTTPChunkCloseConnection(void* x){}
