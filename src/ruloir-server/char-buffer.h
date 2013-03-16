@@ -14,5 +14,6 @@ typedef struct CharBuffer{
 #define CHAR_BUFFER_INITIALIZER		{0}
 
 char CharBufferRead(int fd,CharBuffer *buf);
+void CharBufferReadMany(int fd, CharBuffer *buf, size_t len, void* dst);
 
 #endif
