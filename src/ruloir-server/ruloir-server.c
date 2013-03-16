@@ -55,6 +55,9 @@ int main(int argc, char **argv){
 		struct sockaddr_in client_addr;
 		socklen_t addrlen=sizeof(client_addr);
 		fd=accept(serverfd,(struct sockaddr*)&client_addr,&addrlen);
+		if(fd<0){
+			continue;
+		}
 		
 		char buf;
 		read(fd,&buf,1);
