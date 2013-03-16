@@ -29,6 +29,13 @@ int main(int argc, char **argv){
 		fprintf(stderr,"Not enough arguments\n");
 		exit(1);
 	}
+	
+	long num_cpus=sysconf(_SC_NPROCESSORS_ONLN);
+	if(num_cpus>0){
+		Configuration.default_handler_threads=num_cpus;
+	}
+	printf("%d\n",Configuration.default_handler_threads);
+	
 	ConfigurationLoad(argv[1]);
 	
 	ONLY_HOPE(!ChunkBackendLoad());
@@ -50,6 +57,12 @@ int main(int argc, char **argv){
 	client_handler_head=ClientHandlerNew();
 	ClientHandler *handler=client_handler_head;
 	ClientHandlerSetApp(handler,app);
+	for(int i=1;i<Configuration.default_handler_threads;i++){
+		ClientHandler *handle=ClientHandlerNew();
+		ClientHandlerSetApp(handle, app);
+		handle->next=handler->next;
+		handler->next=handle;
+	}
 	while(running){
 		int fd;
 		struct sockaddr_in client_addr;

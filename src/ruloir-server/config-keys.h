@@ -9,6 +9,7 @@ CONFIG("port",true,int,port,8080)
 CONFIG("maxwaitingclients",true,int,max_waiting_clients,20)
 CONFIG("clientqueuelength",true,int,client_queue_length,20)
 CONFIG("chunkcachelength",true,int,chunk_cache_length,20)
+CONFIG("defaulthandlerthreads",true,int,default_handler_threads,1)
 	
 CONFIG("redisport",true,int,redis_port,6379)
 CONFIG("redisip",false,const char*,redis_ip,"localhost")
