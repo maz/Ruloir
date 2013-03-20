@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <dlfcn.h>
+#include <time.h>
 #include <errno.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>

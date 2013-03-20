@@ -10,7 +10,12 @@ CONFIG("maxwaitingclients",true,int,max_waiting_clients,20)
 CONFIG("clientqueuelength",true,int,client_queue_length,20)
 CONFIG("chunkcachelength",true,int,chunk_cache_length,20)
 CONFIG("defaulthandlerthreads",true,int,default_handler_threads,1)
-	
+
+CONFIG("logfilepath",false,const char*,log_file_path,"./log.txt")
+CONFIG("logfilestderrmirror",true,int,log_file_stderr_mirror,1)
+CONFIG("logfilecolor",true,int,log_file_color,1)
+CONFIG("loglevelminimum",false,const char*,log_level_minimum,"info")
+
 CONFIG("redisport",true,int,redis_port,6379)
 CONFIG("redisip",false,const char*,redis_ip,"localhost")
 

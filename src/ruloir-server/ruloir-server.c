@@ -4,10 +4,12 @@
 #include "client-handler.h"
 #include "special-request.h"
 #include "chunk.h"
+#include "log.h"
 
 //Help me Obi-Wan Kenobi...
-#define ONLY_HOPE(x)		if((x)){perror(#x);exit(errno);}
-#define ONLY_HOPE_GTE0(x)	ONLY_HOPE((x)<0)
+#define FAIL_NO_LOG(x)			({perror(#x);exit(errno);})
+#define ONLY_HOPE(x)			if((x)){FAIL_NO_LOG(x);}
+#define ONLY_HOPE_GTE0(x)		ONLY_HOPE((x)<0)
 
 #define CLIENT_QUEUE_LENGTH			(20)
 #define MAX_CHUNCK_CACHE_LENGTH		(20)
@@ -36,6 +38,8 @@ int main(int argc, char **argv){
 	}
 	
 	ConfigurationLoad(argv[1]);
+	if(!LogOpen())
+		FAIL_NO_LOG();
 	
 	ONLY_HOPE(!ChunkBackendLoad());
 	
