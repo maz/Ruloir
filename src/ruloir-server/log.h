@@ -22,5 +22,6 @@ void LogEntryBegin(log_level_t level);
 void LogEntryPutString(const char *str);
 void LogEntryPutNumber(long num);
 void LogEntryPutHexRepr(void* data, size_t sze);
+void LogEntryPutPthreadSelf();
 
 #endif

@@ -262,3 +262,8 @@ void LogEntryPutHexRepr(void* data, size_t sze){
 	memcpy(entry->contents.string+sizeof(size_t),data,sze);
 	ADD_ENTRY_FOOTER;
 }
+
+void LogEntryPutPthreadSelf(){
+	pthread_t tid=pthread_self();
+	LogEntryPutHexRepr(&tid, sizeof(pthread_t));
+}

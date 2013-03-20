@@ -4,10 +4,11 @@
 #include "config.h"
 #include "crc.h"
 #include "app.h"
+#include "log.h"
 
 #define COMMAND_LENGTH		(12)
 
-char* read_to_crlf(int fd){
+static char* read_to_crlf(int fd){
 	char ch;
 	char *str=malloc(sizeof(char));
 	*str=0;
@@ -130,9 +131,13 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			}
 		}else{
 			WriteConstStr(fd,"COMMAND DOES NOT EXIST");
+			LogEntryBegin(LOG_LEVEL_WARNING);
+			LogEntryPutString("Recieved invalid command");
 		}
 	}else{
 		WriteConstStr(fd,"INVALID SECURITY TOKEN");
+		LogEntryBegin(LOG_LEVEL_WARNING);
+		LogEntryPutString("Recieved invalid security token");
 	}
 	close(fd);
 }
@@ -142,9 +147,22 @@ bool HandleSpecialClient(ClientHandler *handler,Client *client){
 		ChunkCacheLoadKey(handler->cache,client->x.force_update.key_a,client->x.force_update.key_b);
 		free(client->x.force_update.key_a);
 		free(client->x.force_update.key_b);
+		LogEntryBegin(LOG_LEVEL_INFO);
+		LogEntryPutString("Force updated key on thread ");
+		LogEntryPutPthreadSelf();
+		LogEntryPutString(" ");
+		LogEntryPutString(client->x.force_update.key_a);
+		if(client->x.force_update.key_b){
+			LogEntryPutString("[");
+			LogEntryPutString(client->x.force_update.key_b);
+			LogEntryPutString("]");
+		}
 		return true;
 	}else if(client->type==CLIENT_TYPE_LOAD_PROGRAM){
 		ClientHandlerSetApp(handler,client->x.load_program);
+		LogEntryBegin(LOG_LEVEL_INFO);
+		LogEntryPutString("Loaded new program on thread ");
+		LogEntryPutPthreadSelf();
 		return true;
 	}else{
 		return false;
