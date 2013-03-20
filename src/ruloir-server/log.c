@@ -62,12 +62,25 @@ typedef struct LogQueueList{
 	struct LogQueueList *next;
 } LogQueueList;
 
+typedef struct my_log_queue_struct{
+	LogQueueEntry *head;
+	log_level_t log_level;
+} my_log_queue_t;
+
 static FILE* log_file=NULL;
 static log_level_t log_level_minimum;
 static pthread_mutex_t work_to_be_done;
 static pthread_key_t my_log_queue_key;
 static pthread_mutex_t log_queue_list_lock;
 static LogQueueList *log_queue_list=NULL;
+
+static const char* const log_levels_to_strings[]={
+	"DEBUG",
+	"INFO",
+	"WARNING",
+	"ERROR",
+	"FATAL"
+};
 
 static void* logging_thread(void *arg){
 	while(1){
@@ -91,18 +104,10 @@ static void* logging_thread(void *arg){
 	pthread_exit(NULL);
 }
 
-static const char* const log_levels_to_strings[]={
-	"debug",
-	"info",
-	"warning",
-	"error",
-	"fatal"
-};
-
 static void parse_log_level_minimum(){
 	char *str=strdup(Configuration.log_level_minimum);
 	for(char *ptr=str;*ptr;ptr++){
-		*ptr=tolower(*ptr);
+		*ptr=toupper(*ptr);
 	}
 	for(int i=0;i<LAST_LOG_LEVEL;i++){
 		if(strcmp(str,log_levels_to_strings[i])==0){
@@ -137,24 +142,31 @@ void LogCreateThreadQueue(){
 		data[i].written=false;
 		data[i].next=((i+1)<LOG_QUEUE_ENTRY_LIMIT)?(&data[i+1]):(&data[0]);
 	}
-	LogQueueEntry** ptr=malloc(sizeof(LogQueueEntry**));
-	*ptr=data;
+	my_log_queue_t* ptr=malloc(sizeof(my_log_queue_t*));
+	ptr->head=data;
 	pthread_setspecific(my_log_queue_key, ptr);
 	pthread_mutex_lock(&log_queue_list_lock);
 	if(log_queue_list==NULL){
 		log_queue_list=malloc(sizeof(LogQueueList));
-		log_queue_list->head=ptr;
+		log_queue_list->head=&ptr->head;
 		log_queue_list->next=log_queue_list;
 	}else{
 		LogQueueList *lst=malloc(sizeof(LogQueueList));
-		lst->head=ptr;
+		lst->head=&ptr->head;
 		lst->next=log_queue_list->next;
 		log_queue_list->next=lst;
 	}
 	pthread_mutex_unlock(&log_queue_list_lock);
 }
-static LogQueueEntry* next_writable_entry(){
-	LogQueueEntry *head=*((LogQueueEntry**)pthread_getspecific(my_log_queue_key));
+static LogQueueEntry* next_writable_entry(log_level_t level){
+	my_log_queue_t *my_queue=pthread_getspecific(my_log_queue_key);
+	if(level>=0){
+		my_queue->log_level=level;
+	}
+	if(my_queue->log_level<log_level_minimum){
+		return NULL;
+	}
+	LogQueueEntry *head=my_queue->head;
 	LogQueueEntry *entry=head;
 	if(entry->written){
 		do{
@@ -167,20 +179,20 @@ static LogQueueEntry* next_writable_entry(){
 	}
 	return entry;
 }
-#define ADD_ENTRY_HEADER(type_val)	LogQueueEntry *entry=next_writable_entry();	\
+#define ADD_ENTRY_HEADER(type_val, level)	LogQueueEntry *entry=next_writable_entry(level);	\
 								if(entry){	\
 									entry->type=type_val;
 #define ADD_ENTRY_FOOTER	entry->written=true;	\
 		pthread_mutex_unlock(&work_to_be_done);	\
 	}
 void LogEntryBegin(log_level_t level){
-	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_BEGIN);
+	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_BEGIN, level);
 	entry->contents.commence.log_level=level;
 	time(&entry->contents.commence.timestamp);
 	ADD_ENTRY_FOOTER;
 }
 void LogEntryPutString(const char *str){
-	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_STRING);
+	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_STRING, -1);
 	size_t len=strlen(str);
 	if(len>MAX_STRING_LENGTH){
 		len=MAX_STRING_LENGTH;
@@ -190,11 +202,11 @@ void LogEntryPutString(const char *str){
 	ADD_ENTRY_FOOTER;
 }
 void LogEntryPutNumber(long num){
-	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_NUMBER);
+	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_NUMBER, -1);
 	entry->contents.number=num;
 	ADD_ENTRY_FOOTER;
 }
 void LogEntryEnd(){
-	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_END);
+	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_END, -1);
 	ADD_ENTRY_FOOTER;
 }
