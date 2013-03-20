@@ -28,7 +28,10 @@
 
 static const char* const colored_log_levels[]={
 	GIT_COLOR_BOLD_MAGENTA "DEBUG" GIT_COLOR_RESET,
-	GIT_COLOR_BOLD_CYAN "INFO" GIT_COLOR_RESET
+	GIT_COLOR_BOLD_CYAN "INFO" GIT_COLOR_RESET,
+	GIT_COLOR_BOLD_YELLOW "WARNING" GIT_COLOR_RESET,
+	GIT_COLOR_BOLD_RED "ERROR" GIT_COLOR_RESET,
+	GIT_COLOR_BOLD_BLUE "FATAL" GIT_COLOR_RESET
 };
 
 #define LOG_QUEUE_ENTRY_LIMIT		(100)
@@ -36,7 +39,6 @@ static const char* const colored_log_levels[]={
 
 enum{
 	LOG_QUEUE_ENTRY_BEGIN,
-	LOG_QUEUE_ENTRY_END,
 	LOG_QUEUE_ENTRY_STRING,
 	LOG_QUEUE_ENTRY_NUMBER,
 	LOG_QUEUE_ENTRY_OUT_OF_ENTRIES
@@ -82,18 +84,47 @@ static const char* const log_levels_to_strings[]={
 	"FATAL"
 };
 
+static void logging_write(const char *format, ...){
+	va_list args;
+	va_start(args, format);
+	vfprintf(log_file, format, args);
+	if(Configuration.log_file_stderr_mirror)
+		vfprintf(stderr, format, args);
+	va_end(args);
+}
+
+#define MAX_DATE_LENGTH		(100)
+#define DATE_FORMAT			"%Y-%m-%d %H:%M:%S"
+
 static void* logging_thread(void *arg){
+	logging_write("Log opened");
 	while(1){
 		pthread_mutex_lock(&work_to_be_done);
 		pthread_mutex_lock(&log_queue_list_lock);
 		LogQueueList *lst=log_queue_list;
+		const char* const *arr=(Configuration.log_file_color?colored_log_levels:log_levels_to_strings);
 		do{
 			LogQueueEntry *entry=*lst->head;
-			char state=0;
 			do{
 				if(!entry->written)
 					break;
-				
+				if(entry->type==LOG_QUEUE_ENTRY_OUT_OF_ENTRIES){
+					if(entry->type==LOG_QUEUE_ENTRY_OUT_OF_ENTRIES){
+						logging_write("\n%s: logging queue is out of entries", arr[LOG_QUEUE_ENTRY_STRING]);
+					}
+				}else if(entry->type==LOG_QUEUE_ENTRY_BEGIN){
+					struct tm cal;
+					gmtime_r(&entry->contents.commence.timestamp, &cal);
+					char timestamp[MAX_DATE_LENGTH+1]={0};
+					if(!strftime(timestamp, MAX_DATE_LENGTH, DATE_FORMAT, &cal))
+						timestamp[0]='\0';
+					logging_write("\n%s (%s): ", arr[entry->contents.commence.log_level], timestamp);
+				}else if(entry->type==LOG_QUEUE_ENTRY_STRING){
+					logging_write("%s", entry->contents.string);
+				}else if(entry->type==LOG_QUEUE_ENTRY_NUMBER){
+					logging_write("%ld", entry->contents.number);
+				}
+				entry->written=false;
 				entry=entry->next;
 			}while(entry!=*lst->head);
 			lst=lst->next;
@@ -204,9 +235,5 @@ void LogEntryPutString(const char *str){
 void LogEntryPutNumber(long num){
 	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_NUMBER, -1);
 	entry->contents.number=num;
-	ADD_ENTRY_FOOTER;
-}
-void LogEntryEnd(){
-	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_END, -1);
 	ADD_ENTRY_FOOTER;
 }

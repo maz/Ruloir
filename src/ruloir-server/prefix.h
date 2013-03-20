@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <time.h>
+#include <limits.h>
 #include <errno.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>

@@ -21,6 +21,5 @@ void LogClose();
 void LogEntryBegin(log_level_t level);
 void LogEntryPutString(const char *str);
 void LogEntryPutNumber(long num);
-void LogEntryEnd();
 
 #endif
