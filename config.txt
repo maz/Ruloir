@@ -1,12 +1,12 @@
 SystemID: Ubuntu12.04-CONFIG-1.05
 
-#ChunkBackend:	redis
-#RedisIP:		127.0.0.1
-#RedisPort:		6379
+ChunkBackend:	redis
+RedisIP:		127.0.0.1
+RedisPort:		6379
 
-ChunkBackend:	http
-HttpPort:		4567
-HttpIp:			127.0.0.1
+#ChunkBackend:	http
+#HttpPort:		4567
+#HttpIp:			127.0.0.1
 
 Port:			8080
 SecurityToken:	ABCD 

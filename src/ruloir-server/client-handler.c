@@ -3,6 +3,7 @@
 #include "config.h"
 #include "http-parser.h"
 #include "special-request.h"
+#include "log.h"
 
 #define BAD_REQUEST		"HTTP/1.0 400 BAD REQUEST\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n400 Bad Request"
 
@@ -10,11 +11,14 @@ ClientHandler *client_handler_head=NULL;
 
 static void* client_handler(void* self_ptr){
 	ClientHandler *self=self_ptr;
+	LogCreateThreadQueue();
 	HTTPRequest http={0};
 	while(1){
 		ClientQueue *queue=&self->queues[self->queue_handler_uses];
 		
 		for(unsigned int i=0;i<queue->idx;i++){
+			LogEntryBegin(LOG_LEVEL_INFO);
+			LogEntryPutString("Hi!");
 			if(!HandleSpecialClient(self,&queue->clients[i])){
 				ClientNormalRequest *client=&queue->clients[i].x.normal_request;
 				if(HTTPParse(client->fd,&http))

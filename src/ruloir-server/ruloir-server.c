@@ -19,7 +19,7 @@ static int serverfd;
 
 static void stop_running(int sig){
 	running=false;
-	puts("Shutting down...");
+	puts("\nShutting down...");
 	close(serverfd);
 }
 

@@ -88,16 +88,19 @@ static void logging_write(const char *format, ...){
 	va_list args;
 	va_start(args, format);
 	vfprintf(log_file, format, args);
-	if(Configuration.log_file_stderr_mirror)
-		vfprintf(stderr, format, args);
 	va_end(args);
+	if(Configuration.log_file_stderr_mirror){
+		va_start(args, format);
+		vfprintf(stderr, format, args);
+		va_end(args);
+	}
 }
 
 #define MAX_DATE_LENGTH		(100)
 #define DATE_FORMAT			"%Y-%m-%d %H:%M:%S"
 
 static void* logging_thread(void *arg){
-	logging_write("Log opened");
+	logging_write("\nLog opened");
 	while(1){
 		pthread_mutex_lock(&work_to_be_done);
 		pthread_mutex_lock(&log_queue_list_lock);
@@ -131,6 +134,9 @@ static void* logging_thread(void *arg){
 		}while(lst!=log_queue_list);
 		log_queue_list=log_queue_list->next;
 		pthread_mutex_unlock(&log_queue_list_lock);
+		if(Configuration.log_file_stderr_mirror)
+			fflush(stderr);
+		fflush(log_file);
 	}
 	pthread_exit(NULL);
 }
@@ -159,6 +165,8 @@ bool LogOpen(){
 		pthread_key_create(&my_log_queue_key, NULL);
 		LogCreateThreadQueue();
 		pthread_mutex_trylock(&work_to_be_done);
+		pthread_t tid;
+		pthread_create(&tid, NULL, logging_thread, NULL);
 		return true;
 	}else{
 		return false;
