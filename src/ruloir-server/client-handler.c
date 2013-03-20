@@ -17,8 +17,6 @@ static void* client_handler(void* self_ptr){
 		ClientQueue *queue=&self->queues[self->queue_handler_uses];
 		
 		for(unsigned int i=0;i<queue->idx;i++){
-			LogEntryBegin(LOG_LEVEL_INFO);
-			LogEntryPutString("Hi!");
 			if(!HandleSpecialClient(self,&queue->clients[i])){
 				ClientNormalRequest *client=&queue->clients[i].x.normal_request;
 				if(HTTPParse(client->fd,&http))
