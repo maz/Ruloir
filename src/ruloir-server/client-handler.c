@@ -13,6 +13,10 @@ static void* client_handler(void* self_ptr){
 	ClientHandler *self=self_ptr;
 	LogCreateThreadQueue();
 	HTTPRequest http={0};
+	LogEntryBegin(LOG_LEVEL_INFO);
+	LogEntryPutString("Began Client Handler Thread ");
+	pthread_t tid=pthread_self();
+	LogEntryPutHexRepr(&tid, sizeof(pthread_t));
 	while(1){
 		ClientQueue *queue=&self->queues[self->queue_handler_uses];
 		

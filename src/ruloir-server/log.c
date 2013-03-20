@@ -41,6 +41,7 @@ enum{
 	LOG_QUEUE_ENTRY_BEGIN,
 	LOG_QUEUE_ENTRY_STRING,
 	LOG_QUEUE_ENTRY_NUMBER,
+	LOG_QUEUE_ENTRY_HEX_REPR,
 	LOG_QUEUE_ENTRY_OUT_OF_ENTRIES
 };
 
@@ -126,6 +127,13 @@ static void* logging_thread(void *arg){
 					logging_write("%s", entry->contents.string);
 				}else if(entry->type==LOG_QUEUE_ENTRY_NUMBER){
 					logging_write("%ld", entry->contents.number);
+				}else if(entry->type==LOG_QUEUE_ENTRY_HEX_REPR){
+					size_t len;
+					memcpy(&len,entry->contents.string,sizeof(size_t));
+					logging_write("0x");
+					for(unsigned int i=0;i<len;i++){
+						logging_write("%x",(unsigned)entry->contents.string[i+sizeof(size_t)]);
+					}
 				}
 				entry->written=false;
 				entry=entry->next;
@@ -243,5 +251,14 @@ void LogEntryPutString(const char *str){
 void LogEntryPutNumber(long num){
 	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_NUMBER, -1);
 	entry->contents.number=num;
+	ADD_ENTRY_FOOTER;
+}
+void LogEntryPutHexRepr(void* data, size_t sze){
+	ADD_ENTRY_HEADER(LOG_QUEUE_ENTRY_HEX_REPR, -1);
+	if(sze>(MAX_STRING_LENGTH-sizeof(size_t))){
+		sze=MAX_STRING_LENGTH-sizeof(size_t);
+	}
+	memcpy(entry->contents.string,&sze,sizeof(size_t));
+	memcpy(entry->contents.string+sizeof(size_t),data,sze);
 	ADD_ENTRY_FOOTER;
 }
