@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <fcntl.h>
 #include <dlfcn.h>
