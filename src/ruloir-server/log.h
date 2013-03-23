@@ -14,6 +14,7 @@ enum{
 #define LAST_LOG_LEVEL		(LOG_LEVEL_FATAL)
 
 typedef char			log_level_t;
+extern log_level_t LogLevelMinimum;
 
 void LogCreateThreadQueue();
 bool LogOpen();

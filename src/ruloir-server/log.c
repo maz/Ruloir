@@ -71,7 +71,7 @@ typedef struct my_log_queue_struct{
 } my_log_queue_t;
 
 static FILE* log_file=NULL;
-static log_level_t log_level_minimum;
+log_level_t LogLevelMinimum;
 static pthread_mutex_t work_to_be_done;
 static pthread_key_t my_log_queue_key;
 static pthread_mutex_t log_queue_list_lock;
@@ -149,23 +149,23 @@ static void* logging_thread(void *arg){
 	pthread_exit(NULL);
 }
 
-static void parse_log_level_minimum(){
+static void parse_LogLevelMinimum(){
 	char *str=strdup(Configuration.log_level_minimum);
 	for(char *ptr=str;*ptr;ptr++){
 		*ptr=toupper(*ptr);
 	}
 	for(int i=0;i<LAST_LOG_LEVEL;i++){
 		if(strcmp(str,log_levels_to_strings[i])==0){
-			log_level_minimum=i;
+			LogLevelMinimum=i;
 			return;
 		}
 	}
-	log_level_minimum=LOG_LEVEL_DEBUG;//FALLBACK
+	LogLevelMinimum=LOG_LEVEL_DEBUG;//FALLBACK
 	fprintf(stderr, "No log level found '%s'\n",Configuration.log_level_minimum);
 }
 
 bool LogOpen(){
-	parse_log_level_minimum();
+	parse_LogLevelMinimum();
 	log_file=fopen(Configuration.log_file_path, "a");
 	if(log_file){
 		pthread_mutex_init(&work_to_be_done, NULL);
@@ -210,7 +210,7 @@ static LogQueueEntry* next_writable_entry(log_level_t level){
 	if(level>=0){
 		my_queue->log_level=level;
 	}
-	if(my_queue->log_level<log_level_minimum){
+	if(my_queue->log_level<LogLevelMinimum){
 		return NULL;
 	}
 	LogQueueEntry *head=my_queue->head;
