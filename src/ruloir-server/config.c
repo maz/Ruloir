@@ -76,6 +76,17 @@ static void SetConfig(char *key,char *value){
 	}
 }
 
+static void AddCmdToValue(char **value, const char *cmd){
+	FILE *f=popen(cmd, "r");
+	while(!feof(f)){
+		StrAppend(value, fgetc(f));
+	}
+	pclose(f);
+	int idx=strlen(*value)-1;
+	if(idx>=0 && (*value)[idx]=='\n')
+		(*value)[idx]='\0';
+}
+
 void ConfigurationLoad(const char *config_file){
 #define SET_CONFIGURATION_VALUE()	({SetConfig(key,value);		\
 				free(key);										\
@@ -89,6 +100,8 @@ void ConfigurationLoad(const char *config_file){
 		perror("ConfigurationLoad");
 		exit(1);
 	}
+	int fd=fileno_unlocked(f);
+	fcntl(fd, F_SETFD, fcntl(fd, F_GETFL, 0)|FD_CLOEXEC);
 	char ch=fgetc(f);
 	char state=CONFIG_STATE_KEY;
 	char *key=malloc(sizeof(char));
@@ -123,6 +136,16 @@ void ConfigurationLoad(const char *config_file){
 					StrAppend(&value,*env_value);
 				}
 				free(env_key);
+			}else if(ch=='`'){
+				char *cmd=calloc(1,1);
+				while((ch=fgetc(f)) && ch!=EOF && ch!='`'){
+					if(ch=='\\')
+						StrAppend(&cmd, fgetc(f));
+					else
+						StrAppend(&cmd, ch);
+				}
+				AddCmdToValue(&value, cmd);
+				free(cmd);
 			}else{
 				StrAppend(&value,ch);
 			}
