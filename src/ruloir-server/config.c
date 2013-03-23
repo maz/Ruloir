@@ -108,7 +108,24 @@ void ConfigurationLoad(const char *config_file){
 				StrAppend(&key,ch);
 			}
 		}else if(state==CONFIG_STATE_VALUE){
-			StrAppend(&value,ch);
+			if(ch=='\\'){
+				ch=fgetc(f);
+				if(ch!=EOF && ch!='\0')
+					StrAppend(&value, ch);
+			}else if(ch=='$'){
+				char *env_key=malloc(sizeof(char));
+				*env_key=0;
+				while((ch=fgetc(f)) && ch!=EOF && (isalnum(ch)||ch=='_')){
+					StrAppend(&env_key,ch);
+				}
+				ungetc(ch,f);
+				for(char *env_value=getenv(env_key);*env_value;env_value++){
+					StrAppend(&value,*env_value);
+				}
+				free(env_key);
+			}else{
+				StrAppend(&value,ch);
+			}
 		}
 		ch=fgetc(f);
 	}
