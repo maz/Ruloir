@@ -25,8 +25,14 @@ extern log_level_t LogLevelMinimum;
 
 bool LogOpen();
 void LogClose();
-void Log_Internal(log_level_t log_level, ...);
-#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+void Log_Internal(
+#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
+	const char *file,
+	int line,
+	const char *function,
+#endif
+	log_level_t log_level, ...);
+#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 #define Log(level, ...)		Log_Internal(__FILE__, __LINE__, __FUNCTION__, level, __VA_ARGS__)
 #else
 #define Log(level, ...)		Log_Internal(level, __VA_ARGS__)

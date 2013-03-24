@@ -59,7 +59,7 @@ typedef struct LogQueueCommand{
 			log_level_t log_level;
 			time_t timestamp;
 			pthread_t thread;
-			#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+			#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 				const char *file;
 				int line;
 				const char *function;
@@ -141,7 +141,7 @@ static LogQueueCommand out_of_entries_commands[]={
 				.log_level=LOG_LEVEL_WARNING,
 				.timestamp=0,
 				.thread=0,
-				#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+				#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 				.file=__FILE__,
 				.line=135,
 				.function="<none>"
@@ -236,7 +236,7 @@ void LogClose(){
 #define TOO_MANY_CMDS_MSG		"Too many commands were attempted to be written to the log buffer."
 
 void Log_Internal(
-#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 	const char *file,
 	int line,
 	const char *function,
@@ -264,7 +264,7 @@ void Log_Internal(
 		cmd->contents.commence.log_level=log_level;
 		cmd->contents.commence.timestamp=current_time;
 		cmd->contents.commence.thread=pthread_self();
-		#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+		#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 		cmd->contents.commence.line=line;
 		cmd->contents.commence.file=file;
 		cmd->contents.commence.function=function;
@@ -285,8 +285,8 @@ void Log_Internal(
 				int len=strlen(str);
 				if(len>MAX_STRING_LENGTH){
 					Log_Internal(
-						#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
-							file, line, function
+						#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
+							file, line, function,
 						#endif
 						LOG_LEVEL_WARNING,
 						LOG_STRING, "Attemped to log string of length",
