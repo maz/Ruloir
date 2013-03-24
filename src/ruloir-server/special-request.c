@@ -131,13 +131,11 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			}
 		}else{
 			WriteConstStr(fd,"COMMAND DOES NOT EXIST");
-			LogEntryBegin(LOG_LEVEL_WARNING);
-			LogEntryPutString("Recieved invalid command");
+			Log(LOG_LEVEL_WARNING, LOG_STRING, "Recieved Invalid Command", LOG_END);
 		}
 	}else{
 		WriteConstStr(fd,"INVALID SECURITY TOKEN");
-		LogEntryBegin(LOG_LEVEL_WARNING);
-		LogEntryPutString("Recieved invalid security token");
+		Log(LOG_LEVEL_WARNING, LOG_STRING, "Recieved invalid security token", LOG_END);
 	}
 	close(fd);
 }
@@ -145,24 +143,26 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 bool HandleSpecialClient(ClientHandler *handler,Client *client){
 	if(client->type==CLIENT_TYPE_FORCE_UPDATE){
 		ChunkCacheLoadKey(handler->cache,client->x.force_update.key_a,client->x.force_update.key_b);
+		if(client->x.force_update.key_b){
+			Log(LOG_LEVEL_INFO, LOG_STRING, "Force updated key: ",
+				LOG_STRING, client->x.force_update.key_a,
+				LOG_STRING, "[",
+				LOG_STRING, client->x.force_update.key_b,
+				LOG_STRING, "]",
+				LOG_END
+			);
+		}else{
+			Log(LOG_LEVEL_INFO, LOG_STRING, "Force updated key: ",
+				LOG_STRING, client->x.force_update.key_a,
+				LOG_END
+			);
+		}
 		free(client->x.force_update.key_a);
 		free(client->x.force_update.key_b);
-		LogEntryBegin(LOG_LEVEL_INFO);
-		LogEntryPutString("Force updated key on thread ");
-		LogEntryPutPthreadSelf();
-		LogEntryPutString(" ");
-		LogEntryPutString(client->x.force_update.key_a);
-		if(client->x.force_update.key_b){
-			LogEntryPutString("[");
-			LogEntryPutString(client->x.force_update.key_b);
-			LogEntryPutString("]");
-		}
 		return true;
 	}else if(client->type==CLIENT_TYPE_LOAD_PROGRAM){
 		ClientHandlerSetApp(handler,client->x.load_program);
-		LogEntryBegin(LOG_LEVEL_INFO);
-		LogEntryPutString("Loaded new program on thread ");
-		LogEntryPutPthreadSelf();
+		Log(LOG_LEVEL_INFO, "Loaded New App", LOG_END);
 		return true;
 	}else{
 		return false;

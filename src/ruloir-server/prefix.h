@@ -24,6 +24,8 @@
 #include <mongo.h>
 #endif
 
+#define LOGGING_INCLUDE_LOCATION	1
+
 #define strdup(...)	CSTDLIB_STRDUP_IS_DANGEROUS_DUE_TO_JEMALLOC()
 
 #endif

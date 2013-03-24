@@ -11,11 +11,8 @@ ClientHandler *client_handler_head=NULL;
 
 static void* client_handler(void* self_ptr){
 	ClientHandler *self=self_ptr;
-	LogCreateThreadQueue();
 	HTTPRequest http={0};
-	LogEntryBegin(LOG_LEVEL_INFO);
-	LogEntryPutString("Began Client Handler Thread ");
-	LogEntryPutPthreadSelf();
+	Log(LOG_LEVEL_INFO, LOG_STRING, "Began Client Handler", LOG_END);
 	while(1){
 		ClientQueue *queue=&self->queues[self->queue_handler_uses];
 		

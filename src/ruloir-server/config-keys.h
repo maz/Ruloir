@@ -15,6 +15,7 @@ CONFIG("logfilepath",false,const char*,log_file_path,"./log.txt")
 CONFIG("logfilestderrmirror",true,int,log_file_stderr_mirror,1)
 CONFIG("logfilecolor",true,int,log_file_color,1)
 CONFIG("loglevelminimum",false,const char*,log_level_minimum,"info")
+CONFIG("logqueuelength",false,int,log_queue_length,100)
 
 CONFIG("redisport",true,int,redis_port,6379)
 CONFIG("redisip",false,const char*,redis_ip,"localhost")

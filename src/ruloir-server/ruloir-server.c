@@ -66,11 +66,13 @@ int main(int argc, char **argv){
 		handle->next=handler->next;
 		handler->next=handle;
 	}
-	LogEntryBegin(LOG_LEVEL_INFO);
-	LogEntryPutString("Server running on ");
-	LogEntryPutString(Configuration.bind);
-	LogEntryPutString(":");
-	LogEntryPutNumber(Configuration.port);
+	Log(LOG_LEVEL_INFO,
+		LOG_STRING, "Server runing on ",
+		LOG_STRING, Configuration.bind,
+		LOG_STRING, ":",
+		LOG_NUMBER, (long)Configuration.port,
+		LOG_END
+	);
 	while(running){
 		int fd;
 		struct sockaddr_in client_addr;

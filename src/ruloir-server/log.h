@@ -3,6 +3,13 @@
 
 #include "prefix.h"
 
+//We can't use enum here, since these need a known type
+#define LOG_END				((int)0)
+#define LOG_STRING			((int)1)
+//TODO: implement LOG_HEXREPR
+//#define LOG_HEXREPR			((int)2)
+#define LOG_NUMBER			((int)3)
+
 enum{
 	LOG_LEVEL_DEBUG=0,
 	LOG_LEVEL_INFO,
@@ -16,13 +23,12 @@ enum{
 typedef char			log_level_t;
 extern log_level_t LogLevelMinimum;
 
-void LogCreateThreadQueue();
 bool LogOpen();
 void LogClose();
-void LogEntryBegin(log_level_t level);
-void LogEntryPutString(const char *str);
-void LogEntryPutNumber(long num);
-void LogEntryPutHexRepr(void* data, size_t sze);
-void LogEntryPutPthreadSelf();
-
+void Log_Internal(log_level_t log_level, ...);
+#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INLCUDE_LOCATION
+#define Log(level, ...)		Log_Internal(__FILE__, __LINE__, __FUNCTION__, level, __VA_ARGS__)
+#else
+#define Log(level, ...)		Log_Internal(level, __VA_ARGS__)
+#endif
 #endif
