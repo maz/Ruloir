@@ -222,7 +222,8 @@ bool LogOpen(){
 		time(&current_time);
 		pthread_t tid;
 		pthread_create(&tid, NULL, logging_thread, NULL);
-		pthread_create(&tid, NULL, update_time_thread, NULL);
+		if(Configuration.log_fetch_time_in_background)
+			pthread_create(&tid, NULL, update_time_thread, NULL);
 		return true;
 	}else{
 		return false;
@@ -262,7 +263,11 @@ void Log_Internal(
 		LogQueueCommand *cmd=entry->commands;
 		cmd->type=LOG_QUEUE_ENTRY_BEGIN;
 		cmd->contents.commence.log_level=log_level;
-		cmd->contents.commence.timestamp=current_time;
+		if(Configuration.log_fetch_time_in_background){
+			cmd->contents.commence.timestamp=current_time;
+		}else{
+			time(&cmd->contents.commence.timestamp);
+		}
 		cmd->contents.commence.thread=pthread_self();
 		#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
 		cmd->contents.commence.line=line;

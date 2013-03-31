@@ -2,8 +2,14 @@
 #include "prefix.h"
 #include "utils.h"
 
+enum{
+	PARSE_TYPE_STRING=0,
+	PARSE_TYPE_INT=1,
+	PARSE_TYPE_BOOL=2
+};
+
 struct RuloirConfiguration Configuration={
-#define CONFIG(key,is_int,type,name,default)	.name = default ,
+#define CONFIG(key,parse_type,type,name,default)	.name = default ,
 	#include "config-keys.h"
 #undef CONFIG
 	0
@@ -11,10 +17,10 @@ struct RuloirConfiguration Configuration={
 
 static struct ConfigKeyValue{
 	const char *key;
-	bool convert_to_int;
+	unsigned char parse_type;
 	void* ptr;
 } config_keys_values[]={
-#define CONFIG(key,is_int,type,name,default)	{ key, is_int, &Configuration.name },
+#define CONFIG(key,parse_type,type,name,default)	{ key, parse_type, &Configuration.name },
 	#include "config-keys.h"
 #undef CONFIG
 	{NULL}
@@ -64,10 +70,17 @@ static void SetConfig(char *key,char *value){
 				++str_ptr;
 			}
 			if(*value){
-				if(kv->convert_to_int){
+				switch(kv->parse_type){
+				case PARSE_TYPE_INT:
 					*((int*)kv->ptr)=(int)strtol(value,NULL,10);
-				}else{
+					break;
+				case PARSE_TYPE_BOOL:
+					*((bool*)kv->ptr)=(streq_ncs(value,"true")||streq_ncs(value,"yes")||streq_ncs(value,"on"))?true:false;
+					break;
+				case PARSE_TYPE_STRING:
+				default:
 					*((char**)kv->ptr)=strdup(value);
+					break;
 				}
 			}
 			break;

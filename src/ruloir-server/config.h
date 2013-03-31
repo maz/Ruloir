@@ -4,7 +4,7 @@
 #include "prefix.h"
 
 struct RuloirConfiguration{
-#define CONFIG(key,is_int,type,name,default)	type name;
+#define CONFIG(key,parse_type,type,name,default)	type name;
 	#include "config-keys.h"
 #undef CONFIG
 	char overflow;
