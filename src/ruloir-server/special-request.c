@@ -58,76 +58,81 @@ void HandleSpecialRequest(struct sockaddr_in *client_addr,int fd){
 			free(a);
 			free(b);
 		}else if(streq(command_buffer,"LOAD-PROGRAM")){
-			write(fd,Configuration.system_id,strlen(Configuration.system_id));
-			WriteConstStr(fd,"\r\n");
-			char *str=read_to_crlf(fd);
-			int len=atoi(str);
-			free(str);
-			if(!len){
-				close(fd);
-				return;
-			}
-			uint32_t crc_buf=CRC32InitialValue;
-			uint32_t crc;
-			size_t sze=strlen(Configuration.app_path);
-			str=malloc(sze+2);
-			memcpy(str,Configuration.app_path,sze);
-			str[sze]='~';
-			str[sze+1]='\0';
-			puts(str);
-			FILE *tmp=fopen(str,"wb");
-#define CLEANUP_TMP()	({if(tmp){fclose(tmp);}unlink(str);free(str);})
-			if(tmp){
-				while(len){
-					if(read(fd,&ch,1)!=1){
-						CLEANUP_TMP();
-						close(fd);
-						return;
-					}
-					crc=CRC32(&crc_buf,ch);
-					fputc(ch,tmp);
-					len--;
+			if(Configuration.enable_app_loading){
+				write(fd,Configuration.system_id,strlen(Configuration.system_id));
+				WriteConstStr(fd,"\r\n");
+				char *str=read_to_crlf(fd);
+				int len=atoi(str);
+				free(str);
+				if(!len){
+					close(fd);
+					return;
 				}
-				fclose(tmp);
-				tmp=NULL;
-				read(fd,&crc_buf,4);
-				crc=htonl(crc);
-				if(crc_buf==crc){
-					char *err=NULL;
-					App *app=AppOpen(str,&err);
-					if(err){
-						WriteConstStr(fd,"DLOPEN-ERROR\r\n");
-						write(fd,err,strlen(err));
-						WriteConstStr(fd,"\r\n");
-						free(err);
-						CLEANUP_TMP();
+				uint32_t crc_buf=CRC32InitialValue;
+				uint32_t crc;
+				size_t sze=strlen(Configuration.app_path);
+				str=malloc(sze+2);
+				memcpy(str,Configuration.app_path,sze);
+				str[sze]='~';
+				str[sze+1]='\0';
+				puts(str);
+				FILE *tmp=fopen(str,"wb");
+#define CLEANUP_TMP()	({if(tmp){fclose(tmp);}unlink(str);free(str);})
+				if(tmp){
+					while(len){
+						if(read(fd,&ch,1)!=1){
+							CLEANUP_TMP();
+							close(fd);
+							return;
+						}
+						crc=CRC32(&crc_buf,ch);
+						fputc(ch,tmp);
+						len--;
+					}
+					fclose(tmp);
+					tmp=NULL;
+					read(fd,&crc_buf,4);
+					crc=htonl(crc);
+					if(crc_buf==crc){
+						char *err=NULL;
+						App *app=AppOpen(str,&err);
+						if(err){
+							WriteConstStr(fd,"DLOPEN-ERROR\r\n");
+							write(fd,err,strlen(err));
+							WriteConstStr(fd,"\r\n");
+							free(err);
+							CLEANUP_TMP();
+						}else{
+							ClientHandler *handler=client_handler_head;
+							do{
+								Client client={.type=CLIENT_TYPE_LOAD_PROGRAM};
+								client.x.load_program=app;
+								ClientHandlerEnqueueClient(handler,&client);
+								//TODO: what do we do if the client's queue is full (aside from freeing the memory)?
+								handler=handler->next;
+							}while(handler!=client_handler_head);
+							WriteConstStr(fd,"OK\r\n\r\n");
+							unlink(Configuration.app_path);
+							rename(str,Configuration.app_path);
+							CLEANUP_TMP();
+						}
 					}else{
-						ClientHandler *handler=client_handler_head;
-						do{
-							Client client={.type=CLIENT_TYPE_LOAD_PROGRAM};
-							client.x.load_program=app;
-							ClientHandlerEnqueueClient(handler,&client);
-							//TODO: what do we do if the client's queue is full (aside from freeing the memory)?
-							handler=handler->next;
-						}while(handler!=client_handler_head);
-						WriteConstStr(fd,"OK\r\n\r\n");
-						unlink(Configuration.app_path);
-						rename(str,Configuration.app_path);
+						WriteConstStr(fd,"CRC32-MISMATCH\r\n");
+						write(fd,&crc,4);
+						WriteConstStr(fd,"\r\n");
 						CLEANUP_TMP();
 					}
 				}else{
-					WriteConstStr(fd,"CRC32-MISMATCH\r\n");
-					write(fd,&crc,4);
+					WriteConstStr(fd,"FILE-ERROR\r\n");
+					char *buf=calloc(STRERROR_MAX_LENGTH,1);
+					strerror_r(errno,buf,STRERROR_MAX_LENGTH);
+					write(fd,buf,strlen(buf));
 					WriteConstStr(fd,"\r\n");
-					CLEANUP_TMP();
+					free(buf);
 				}
 			}else{
-				WriteConstStr(fd,"FILE-ERROR\r\n");
-				char *buf=calloc(STRERROR_MAX_LENGTH,1);
-				strerror_r(errno,buf,STRERROR_MAX_LENGTH);
-				write(fd,buf,strlen(buf));
-				WriteConstStr(fd,"\r\n");
-				free(buf);
+				Log(LOG_LEVEL_WARNING, LOG_STRING, "Recieved LOAD-PROGRAM command, but that command is currently disabled in the configuration file.", LOG_END);
+				WriteConstStr(fd, "COMMAND DISABLED");
 			}
 		}else{
 			WriteConstStr(fd,"COMMAND DOES NOT EXIST");

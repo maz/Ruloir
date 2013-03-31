@@ -11,6 +11,8 @@ CONFIG("clientqueuelength",PARSE_TYPE_INT,int,client_queue_length,20)
 CONFIG("chunkcachelength",PARSE_TYPE_INT,int,chunk_cache_length,20)
 CONFIG("defaulthandlerthreads",PARSE_TYPE_INT,int,default_handler_threads,1)
 
+CONFIG("enableapploadingatruntime",PARSE_TYPE_BOOL,bool,enable_app_loading,false)
+
 CONFIG("logfilepath",PARSE_TYPE_STRING,const char*,log_file_path,"./log.txt")
 CONFIG("logfilestderrmirror",PARSE_TYPE_INT,int,log_file_stderr_mirror,1)
 CONFIG("logfilecolor",PARSE_TYPE_INT,int,log_file_color,1)
