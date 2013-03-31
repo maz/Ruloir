@@ -188,7 +188,7 @@ static void* logging_thread(void *arg){
 	pthread_exit(NULL);
 }
 
-static void parse_LogLevelMinimum(){
+static bool parse_LogLevelMinimum(){
 	char *str=strdup(Configuration.log_level_minimum);
 	for(char *ptr=str;*ptr;ptr++){
 		*ptr=toupper(*ptr);
@@ -196,11 +196,11 @@ static void parse_LogLevelMinimum(){
 	for(int i=0;i<LAST_LOG_LEVEL;i++){
 		if(strcmp(str,log_levels_to_strings[i])==0){
 			LogLevelMinimum=i;
-			return;
+			return true;
 		}
 	}
 	LogLevelMinimum=LOG_LEVEL_DEBUG;//FALLBACK
-	fprintf(stderr, "No log level found '%s'\n",Configuration.log_level_minimum);
+	return false;
 }
 
 static void* update_time_thread(void* arg){
@@ -212,7 +212,7 @@ static void* update_time_thread(void* arg){
 }
 
 bool LogOpen(){
-	parse_LogLevelMinimum();
+	bool log_level_minimum_parsing_success=parse_LogLevelMinimum();
 	log_file=fopen(Configuration.log_file_path, "a");
 	if(log_file){
 		log_queue=malloc(sizeof(LogQueueEntry)*Configuration.log_queue_length);
@@ -229,6 +229,8 @@ bool LogOpen(){
 			pthread_t tid;
 			pthread_create(&tid, NULL, update_time_thread, NULL);
 		}
+		if(!log_level_minimum_parsing_success)
+			Log(LOG_LEVEL_ERROR, LOG_STRING, "Configuration entry for 'LogLevelMinimum' was invalid: ", LOG_STRING, Configuration.log_level_minimum, LOG_END);
 		return true;
 	}else{
 		return false;
