@@ -121,6 +121,9 @@ static void log_queue_command_write(LogQueueCommand *entry){
 			timestamp[0]='\0';
 		logging_write("%s (%s, ", arr[entry->contents.commence.log_level], timestamp);
 		logging_write_hex_repr(entry->contents.commence.thread, sizeof(pthread_t));
+		#if defined(LOGGING_INCLUDE_LOCATION) && LOGGING_INCLUDE_LOCATION
+			logging_write(" %s() at %s:%d", entry->contents.commence.function, entry->contents.commence.file, entry->contents.commence.line);
+		#endif
 		logging_write("): ");
 	}else if(entry->type==LOG_QUEUE_ENTRY_STRING){
 		logging_write("%s", entry->contents.string);
