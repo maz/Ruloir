@@ -2,7 +2,7 @@
 mkdir -p bin
 
 if [ -z $CC ]; then
-	if which clang >> /dev/null 2> /dev/null; then
+	if type clang >> /dev/null 2> /dev/null; then
 		CC="/usr/bin/env clang"
 	else
 		CC="/usr/bin/env gcc"
