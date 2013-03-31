@@ -38,7 +38,7 @@ static bool recieved_200(int fd, CharBuffer *buf){
 
 static bool read_until_rn(int fd, CharBuffer *buf){
 	bool r_read=false;
-	while(buf->len>0){
+	while(!CharBufferEof(buf)){
 		char ch=CharBufferRead(fd, buf);
 		if(r_read){
 			if(ch=='\n')
@@ -56,56 +56,58 @@ static bool read_until_rn(int fd, CharBuffer *buf){
 void HTTPChunkGet(void* ctx,Chunk *chunk){
 	int fd=HTTPFd();
 	SendMethod(fd,"GET",chunk->key_a,chunk->key_b);
-	CharBuffer buf=CHAR_BUFFER_INITIALIZER;
-	if(recieved_200(fd, &buf)){
-		read_until_rn(fd, &buf);
+	CharBuffer *buf=CharBufferNew();
+	if(recieved_200(fd, buf)){
+		read_until_rn(fd, buf);
 		chunk->len=0;
-		char ch=CharBufferRead(fd, &buf);
+		char ch=CharBufferRead(fd, buf);
 		//TODO: make this deal with incomplete HTTP responses better
 		while(ch!='\r'){
 			if(ch=='C' &&
-				CharBufferRead(fd, &buf)=='o' &&
-				CharBufferRead(fd, &buf)=='n' &&
-				CharBufferRead(fd, &buf)=='t' &&
-				CharBufferRead(fd, &buf)=='e' &&
-				CharBufferRead(fd, &buf)=='n' &&
-				CharBufferRead(fd, &buf)=='t' &&
-				CharBufferRead(fd, &buf)=='-' &&
-				CharBufferRead(fd, &buf)=='L' &&
-				CharBufferRead(fd, &buf)=='e' &&
-				CharBufferRead(fd, &buf)=='n' &&
-				CharBufferRead(fd, &buf)=='g' &&
-				CharBufferRead(fd, &buf)=='t' &&
-				CharBufferRead(fd, &buf)=='h'
+				CharBufferRead(fd, buf)=='o' &&
+				CharBufferRead(fd, buf)=='n' &&
+				CharBufferRead(fd, buf)=='t' &&
+				CharBufferRead(fd, buf)=='e' &&
+				CharBufferRead(fd, buf)=='n' &&
+				CharBufferRead(fd, buf)=='t' &&
+				CharBufferRead(fd, buf)=='-' &&
+				CharBufferRead(fd, buf)=='L' &&
+				CharBufferRead(fd, buf)=='e' &&
+				CharBufferRead(fd, buf)=='n' &&
+				CharBufferRead(fd, buf)=='g' &&
+				CharBufferRead(fd, buf)=='t' &&
+				CharBufferRead(fd, buf)=='h'
 			){
 				do{
-					ch=CharBufferRead(fd, &buf);
+					ch=CharBufferRead(fd, buf);
 				}while(isspace(ch) || ch==':');
 				while(ch!='\r'){
 					chunk->len*=10;
 					chunk->len+=VALUE_OF_DIGIT(ch);
-					ch=CharBufferRead(fd, &buf);
+					ch=CharBufferRead(fd, buf);
 				}
-				CharBufferRead(fd, &buf);//read \n
+				CharBufferRead(fd, buf);//read \n
 			}else{
-				read_until_rn(fd, &buf);
+				read_until_rn(fd, buf);
 			}
-			ch=CharBufferRead(fd, &buf);
+			ch=CharBufferRead(fd, buf);
 		}
-		CharBufferRead(fd, &buf);//=> \n
+		CharBufferRead(fd, buf);//=> \n
 		chunk->value=malloc(chunk->len);
-		CharBufferReadMany(fd, &buf, chunk->len, chunk->value);
+		CharBufferReadMany(fd, buf, chunk->len, chunk->value);
 	}else{
 		chunk->len=0;
 		chunk->value=NULL;
 	}
 	close(fd);
+	CharBufferFree(buf);
 }
 bool HTTPChunkExists(void* ctx,const char *key){
 	int fd=HTTPFd();
 	SendMethod(fd,"HEAD",key,NULL);
-	CharBuffer buf=CHAR_BUFFER_INITIALIZER;
-	bool result=recieved_200(fd, &buf);
+	CharBuffer *buf=CharBufferNew();
+	bool result=recieved_200(fd, buf);
+	CharBufferFree(buf);
 	close(fd);
 	return result;
 }

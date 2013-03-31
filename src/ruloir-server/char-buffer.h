@@ -3,16 +3,11 @@
 
 #include "prefix.h"
 
-#define CHAR_BUFFER_SIZE	(256)
+typedef struct CharBuffer CharBuffer;
 
-typedef struct CharBuffer{
-	int idx;
-	int len;
-	char buffer[CHAR_BUFFER_SIZE];
-} CharBuffer;
-
-#define CHAR_BUFFER_INITIALIZER		{0}
-
+CharBuffer* CharBufferNew();
+void CharBufferFree(CharBuffer *buf);
+bool CharBufferEof(CharBuffer *buf);
 char CharBufferRead(int fd,CharBuffer *buf);
 void CharBufferReadMany(int fd, CharBuffer *buf, size_t len, void* dst);
 

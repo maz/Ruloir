@@ -35,29 +35,30 @@ void RedisChunkGet(void* conn,Chunk *chunk){
 		WriteConstStr(fd,"*2\r\n$3\r\nGET\r\n");
 		write_param(fd,chunk->key_a);
 	}
-	CharBuffer char_buf=CHAR_BUFFER_INITIALIZER;
+	CharBuffer *char_buf=CharBufferNew();
 	char ch;
-	ch=CharBufferRead(fd,&char_buf);
+	ch=CharBufferRead(fd,char_buf);
 	char buf[LENGTH_BUFFER_LENGTH]={0};
 	char i=0;
-	ch=CharBufferRead(fd,&char_buf);
+	ch=CharBufferRead(fd,char_buf);
 	while(i<LENGTH_BUFFER_LENGTH && ch!='\r'){
 		buf[i]=ch;
-		ch=CharBufferRead(fd,&char_buf);
+		ch=CharBufferRead(fd,char_buf);
 		++i;
 	}
 	//assume we've hit the \r
-	ch=CharBufferRead(fd,&char_buf);//read the \n
+	ch=CharBufferRead(fd,char_buf);//read the \n
 	chunk->len=atoi(buf);
 	if(chunk->len>0){
 		//FOUND
 		chunk->value=malloc(chunk->len);
-		CharBufferReadMany(fd, &char_buf, chunk->len, chunk->value);
-		CharBufferReadMany(fd, &char_buf, 2, buf);//read the \r\n
+		CharBufferReadMany(fd, char_buf, chunk->len, chunk->value);
+		CharBufferReadMany(fd, char_buf, 2, buf);//read the \r\n
 	}else{
 		//NOT FOUND
 		chunk->value=NULL;
 	}
+	CharBufferFree(char_buf);
 	close(fd);
 }
 

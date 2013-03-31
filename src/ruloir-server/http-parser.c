@@ -2,11 +2,12 @@
 #include "char-buffer.h"
 #include "prefix.h"
 
-#define READ_CH()		({ch=toupper(CharBufferRead(fd,&char_buf));})
+#define READ_CH()		({ch=toupper(CharBufferRead(fd,char_buf));})
+#define CLEANUP()		({CharBufferFree(char_buf);})
 
 bool HTTPParse(int fd,HTTPRequest *http){
 	char ch;
-	CharBuffer char_buf=CHAR_BUFFER_INITIALIZER;
+	CharBuffer *char_buf=CharBufferNew();
 	READ_CH();
 	switch(ch){
 	case 'E':
@@ -23,6 +24,7 @@ bool HTTPParse(int fd,HTTPRequest *http){
 				http->method=HTTPDelete;
 				break;
 			default:
+				CLEANUP();
 				return false;
 		}
 		break;
@@ -36,6 +38,7 @@ bool HTTPParse(int fd,HTTPRequest *http){
 				http->method=HTTPConnect;
 				break;
 			default:
+				CLEANUP();
 				return false;
 		}
 		break;
@@ -52,18 +55,20 @@ bool HTTPParse(int fd,HTTPRequest *http){
 		http->method=HTTPPatch;
 		break;
 	default:
+		CLEANUP();
 		return false;
 	}
 	do{
-		ch=CharBufferRead(fd,&char_buf);
+		ch=CharBufferRead(fd,char_buf);
 	}while(ch!=' ');
 	unsigned int i=0;
-	ch=CharBufferRead(fd,&char_buf);
+	ch=CharBufferRead(fd,char_buf);
 	while(i<MAX_HTTP_PATH_LENGTH && ch!=' '){
 		http->path[i]=ch;
 		i++;
-		ch=CharBufferRead(fd,&char_buf);
+		ch=CharBufferRead(fd,char_buf);
 	}
 	http->path[i]=0;
+	CLEANUP();
 	return true;
 }
