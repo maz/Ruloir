@@ -277,9 +277,9 @@ void Log_Internal(
 		va_list lst;
 		va_start(lst, log_level);
 		int type;
-#define INCR()		({++entry->command_length;cmd++;})
-		INCR();
 		while((type=va_arg(lst, int))!=LOG_END && entry->command_length<=LOG_QUEUE_ENTRY_LENGTH){
+			++entry->command_length;
+			cmd++;
 			if(type==LOG_NUMBER){
 				long num=va_arg(lst, long);
 				cmd->type=LOG_QUEUE_ENTRY_NUMBER;
@@ -305,9 +305,7 @@ void Log_Internal(
 				memcpy(cmd->contents.string, str, len);
 				cmd->contents.string[len]='\0';
 			}
-			INCR();
 		}
-#undef INCR
 		va_end(lst);
 		if(entry->command_length>LOG_QUEUE_ENTRY_LENGTH){
 			entry->command_length=2;
