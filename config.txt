@@ -1,3 +1,4 @@
+#!./bin/ruloir-server
 SystemID: Ubuntu12.04-CONFIG-1.05
 
 ChunkBackend:	redis
