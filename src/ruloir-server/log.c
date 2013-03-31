@@ -119,7 +119,7 @@ static void log_queue_command_write(LogQueueCommand *entry){
 		char timestamp[MAX_DATE_LENGTH+1]={0};
 		if(!strftime(timestamp, MAX_DATE_LENGTH, DATE_FORMAT, &cal))
 			timestamp[0]='\0';
-		logging_write("\n%s (%s, ", arr[entry->contents.commence.log_level], timestamp);
+		logging_write("%s (%s, ", arr[entry->contents.commence.log_level], timestamp);
 		logging_write_hex_repr(entry->contents.commence.thread, sizeof(pthread_t));
 		logging_write("): ");
 	}else if(entry->type==LOG_QUEUE_ENTRY_STRING){
@@ -157,9 +157,12 @@ static LogQueueCommand out_of_entries_commands[]={
 	}
 };
 
+static bool logging_thread_working=true;
+static pthread_t logging_thread_id;
+
 static void* logging_thread(void *arg){
-	logging_write("\nLog opened");
-	while(1){
+	Log(LOG_LEVEL_INFO, LOG_STRING, "Log Opened", LOG_END);
+	while(logging_thread_working){
 		pthread_mutex_lock(&log_queue_work_to_be_done);
 		if(out_of_entries){
 			time(&out_of_entries_commands[0].contents.commence.timestamp);
@@ -171,9 +174,10 @@ static void* logging_thread(void *arg){
 			for(unsigned char i=0;i<log_queue->command_length;i++){
 				log_queue_command_write(&log_queue->commands[i]);
 			}
-			log_queue->reserved=false;
+			logging_write("\n");
 			log_queue->written=false;
-			log_queue=log_queue->next;
+			log_queue->reserved=false;
+			CompareAndSwap(&log_queue, log_queue, log_queue->next);//be more atomic about it (i.e. use the lock instruction)
 			out_of_entries=false;//Do this here, since we'll have at least one more entry
 		}
 		
@@ -220,16 +224,22 @@ bool LogOpen(){
 		pthread_mutex_init(&log_queue_work_to_be_done, NULL);
 		pthread_mutex_trylock(&log_queue_work_to_be_done);
 		time(&current_time);
-		pthread_t tid;
-		pthread_create(&tid, NULL, logging_thread, NULL);
-		if(Configuration.log_fetch_time_in_background)
+		pthread_create(&logging_thread_id, NULL, logging_thread, NULL);
+		if(Configuration.log_fetch_time_in_background){
+			pthread_t tid;
 			pthread_create(&tid, NULL, update_time_thread, NULL);
+		}
 		return true;
 	}else{
 		return false;
 	}
 }
 void LogClose(){
+	Log(LOG_LEVEL_INFO, LOG_STRING, "Log closed", LOG_END);
+	CompareAndSwap(&logging_thread_working, true, false);
+	pthread_mutex_unlock(&log_queue_work_to_be_done);
+	void* retval;
+	pthread_join(logging_thread_id, &retval);
 	pthread_mutex_destroy(&log_queue_work_to_be_done);
 	fclose(log_file);
 }

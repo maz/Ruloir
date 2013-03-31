@@ -19,7 +19,7 @@ static int serverfd;
 
 static void stop_running(int sig){
 	running=false;
-	puts("\nShutting down...");
+	puts("Shutting down...");
 	close(serverfd);
 }
 
@@ -111,5 +111,6 @@ int main(int argc, char **argv){
 	}
 	if(app)
 		dlclose(app->handle);
+	LogClose();
 	exit(0);
 }
