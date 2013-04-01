@@ -199,10 +199,12 @@ static bool parse_LogLevelMinimum(){
 	for(int i=0;i<LAST_LOG_LEVEL;i++){
 		if(strcmp(str,log_levels_to_strings[i])==0){
 			LogLevelMinimum=i;
+			free(str);
 			return true;
 		}
 	}
 	LogLevelMinimum=LOG_LEVEL_DEBUG;//FALLBACK
+	free(str);
 	return false;
 }
 
