@@ -19,11 +19,19 @@ static void* client_handler(void* self_ptr){
 		for(unsigned int i=0;i<queue->idx;i++){
 			if(!HandleSpecialClient(self,&queue->clients[i])){
 				ClientNormalRequest *client=&queue->clients[i].x.normal_request;
-				if(HTTPParse(client->fd,&http))
-					//handle_client(self,client,&http);
+				if(HTTPParse(client->fd,&http)){
+					if(Configuration.log_each_request){
+						Log(LOG_LEVEL_INFO,
+							LOG_STRING, http.method,
+							LOG_STRING, " ",
+							LOG_STRING, http.path,
+							LOG_END
+						);
+					}
 					self->app->func(&self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
-				else
+				}else{
 					WriteConstStr(client->fd,BAD_REQUEST);
+				}
 				close(client->fd);
 			}
 		}

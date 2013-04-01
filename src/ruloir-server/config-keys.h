@@ -19,6 +19,7 @@ CONFIG("logfilecolor",PARSE_TYPE_INT,int,log_file_color,1)
 CONFIG("loglevelminimum",PARSE_TYPE_STRING,const char*,log_level_minimum,"info")
 CONFIG("logqueuelength",PARSE_TYPE_STRING,int,log_queue_length,100)
 CONFIG("logfetchtimeinbackground",PARSE_TYPE_BOOL,bool,log_fetch_time_in_background,true)
+CONFIG("logeachrequest",PARSE_TYPE_BOOL,bool,log_each_request,false)
 
 CONFIG("redisport",PARSE_TYPE_INT,int,redis_port,6379)
 CONFIG("redisip",PARSE_TYPE_STRING,const char*,redis_ip,"localhost")
