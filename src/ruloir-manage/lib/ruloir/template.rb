@@ -64,7 +64,7 @@ module Ruloir
           code<< ", #{string_escape(i)}"
         end
         i+=1
-        code<< ", &data, &len);\nBufferedWrite(fd, data, len);\n"
+        code<< ", &data, &len);\nBufferedWrite(handle, data, len);\n"
       end
       
       code
