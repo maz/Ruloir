@@ -5,8 +5,8 @@ module Ruloir
     DYNAMIC_REGEX_GROUPS=/<%=[ \t\r\n]*([A-Za-z_$0-9@!]+)[ \t\r\n]*(\[[ \t\r\n]*([A-Za-z_$0-9@!]+)[ \t\r\n]*\])?[ \t\r\n]*%>/m
     DYNAMIC_REGEX_NO_GROUPS=/<%=[ \t\r\n]*[A-Za-z_$0-9@!]+[ \t\r\n]*\[[ \t\r\n]*[A-Za-z_$0-9@!]+[ \t\r\n]*\]?[ \t\r\n]*%>/m 
     
-    def self.parse_file(file, name)
-      self.parse(File.read(file), name)
+    def self.parse_file(file)
+      self.parse(File.read(file), file.split('/').last)
     end
     def self.parse(code, name)
       self.new(
@@ -26,14 +26,30 @@ module Ruloir
     
     attr_reader :name, :static_chunks, :dynamic_chunks
     
+    def upload_static_chunks_to_redis(redis)
+      each_static_chunk do |keys, value|
+        redis.hset(keys.first, keys.last, value)
+      end
+    end
+    
+    def each_static_chunk(&block)
+      i=0
+      combined_chunks do |elem|
+        if !elem.is_a?(Array)
+          yield([key_a, i.to_s],elem)
+        end
+        i+=1
+      end
+    end
+    
     def c_code
-      code="int *len; const char* data;\n"
+      code="int len; const char* data;\n"
       
       digest=chunk_digest
       
       i=0
       combined_chunks do |elem|
-        code<< "ChunkGet(ctx, "
+        code<< "ChunkGet(cache, "
         if elem.is_a?(Array)
           if elem.length==1
             code<< string_escape(elem.first)
@@ -44,7 +60,7 @@ module Ruloir
             code<< string_escape(elem.last)
           end
         else
-          code<< string_escape("#{name}_static_#{digest}")
+          code<< string_escape(key_a)
           code<< ", #{string_escape(i)}"
         end
         i+=1
@@ -54,6 +70,9 @@ module Ruloir
       code
     end
     private
+    def key_a
+      "#{name}_static_#{digest}"
+    end
     def string_escape(x)
       x.to_s.inspect
     end
