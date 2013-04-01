@@ -42,6 +42,7 @@ typedef struct ClientHandler{
 	pthread_mutex_t queue_handler_uses_lock;
 	
 	ChunkCache cache;
+	void* app_handle;
 	App *app;
 } ClientHandler;
 

@@ -2,7 +2,8 @@
 
 #define WriteConstStr(fd,str)	write(fd,str,(sizeof(str)/sizeof(char))-1)
 
-void AppFunc(void* ctx,
+void AppFunc(void* handle,
+			void* cache,
 			int fd,
 			const char *method,
 			const char *path,

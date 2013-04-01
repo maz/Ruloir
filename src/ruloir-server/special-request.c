@@ -167,7 +167,8 @@ bool HandleSpecialClient(ClientHandler *handler,Client *client){
 		return true;
 	}else if(client->type==CLIENT_TYPE_LOAD_PROGRAM){
 		ClientHandlerSetApp(handler,client->x.load_program);
-		Log(LOG_LEVEL_INFO, "Loaded New App", LOG_END);
+		if(handler->app)
+			Log(LOG_LEVEL_INFO, LOG_STRING, "Loaded New App", LOG_END);
 		return true;
 	}else{
 		return false;

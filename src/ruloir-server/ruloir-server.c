@@ -57,6 +57,14 @@ int main(int argc, char **argv){
 	ONLY_HOPE(bind(serverfd,(struct sockaddr*)addr,size));
 	ONLY_HOPE(listen(serverfd,Configuration.max_waiting_clients));
 	
+	Log(LOG_LEVEL_INFO,
+		LOG_STRING, "Server running on ",
+		LOG_STRING, Configuration.bind,
+		LOG_STRING, ":",
+		LOG_NUMBER, (long)Configuration.port,
+		LOG_END
+	);
+	
 	client_handler_head=ClientHandlerNew();
 	ClientHandler *handler=client_handler_head;
 	ClientHandlerSetApp(handler,app);
@@ -66,13 +74,6 @@ int main(int argc, char **argv){
 		handle->next=handler->next;
 		handler->next=handle;
 	}
-	Log(LOG_LEVEL_INFO,
-		LOG_STRING, "Server runing on ",
-		LOG_STRING, Configuration.bind,
-		LOG_STRING, ":",
-		LOG_NUMBER, (long)Configuration.port,
-		LOG_END
-	);
 	while(running){
 		int fd;
 		struct sockaddr_in client_addr;
@@ -109,8 +110,15 @@ int main(int argc, char **argv){
 		}
 		handler=ch;
 	}
-	if(app)
-		dlclose(app->handle);
+	handler=client_handler_head;
+	do{
+		Client client={.type=CLIENT_TYPE_LOAD_PROGRAM};
+		client.x.load_program=NULL;
+		ClientHandlerEnqueueClient(handler,&client);
+		void *retval;
+		pthread_join(handler->thread, &retval);
+		handler=handler->next;
+	}while(handler!=client_handler_head);
 	LogClose();
 	exit(0);
 }

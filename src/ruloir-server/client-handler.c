@@ -28,13 +28,17 @@ static void* client_handler(void* self_ptr){
 							LOG_END
 						);
 					}
-					self->app->func(&self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
+					if(self->app)
+						self->app->func(self->app_handle,&self->cache,client->fd,http.method,http.path,AppChunkGet,AppChunkExists);
 				}else{
 					WriteConstStr(client->fd,BAD_REQUEST);
 				}
 				close(client->fd);
 			}
 		}
+		
+		if(!self->app)
+			break;
 		
 		//Switch active queue
 		queue->idx=0;
@@ -69,9 +73,14 @@ ClientHandler *ClientHandlerNew(){
 
 void ClientHandlerSetApp(ClientHandler *self,App *app){
 	if(self->app){
+		if(self->app->destroy_handle)
+			self->app->destroy_handle(self->app_handle);
 		AppRelease(self->app);
 	}
 	self->app=AppRetain(app);
+	if(self->app && self->app->create_handle){
+		self->app_handle=self->app->create_handle();
+	}
 }
 
 void ClientQueueInit(ClientQueue* queue){

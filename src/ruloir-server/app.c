@@ -17,16 +17,27 @@ App* AppOpen(const char *file,char **err){
 	App *app=malloc(sizeof(App));
 	app->func=func;
 	app->handle=handle;
+	app->create_handle=dlsym(handle, "AppCreateHandle");
+	app->destroy_handle=dlsym(handle, "AppDestroyHandle");
 	app->ref_count=0;//Yes, that's right
+	if((func=dlsym(handle, "AppInit"))){
+		((void (*)())func)();
+	}
 	return app;
 }
 App* AppRetain(App* app){
-	++app->ref_count;
+	if(app){
+		++app->ref_count;
+	}
 	return app;
 }
 void AppRelease(App *app){
 	--app->ref_count;
 	if(app->ref_count<=0){
+		void *func=dlsym(app->handle, "AppClose");
+		if(func){
+			((void (*)())func)();
+		}
 		dlclose(app->handle);
 		free(app);
 	}
