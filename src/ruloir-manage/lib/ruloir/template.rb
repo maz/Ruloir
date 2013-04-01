@@ -5,16 +5,16 @@ module Ruloir
     DYNAMIC_REGEX_GROUPS=/<%=[ \t\r\n]*([A-Za-z_$0-9@!]+)[ \t\r\n]*(\[[ \t\r\n]*([A-Za-z_$0-9@!]+)[ \t\r\n]*\])?[ \t\r\n]*%>/m
     DYNAMIC_REGEX_NO_GROUPS=/<%=[ \t\r\n]*[A-Za-z_$0-9@!]+[ \t\r\n]*\[[ \t\r\n]*[A-Za-z_$0-9@!]+[ \t\r\n]*\]?[ \t\r\n]*%>/m 
     
-    def self.parse_file(file)
-      self.parse(File.read(file))
+    def self.parse_file(file, name)
+      self.parse(File.read(file), name)
     end
-    def self.parse(code, name=nil)
+    def self.parse(code, name)
       self.new(
         code.split(DYNAMIC_REGEX_NO_GROUPS),
         code.scan(DYNAMIC_REGEX_GROUPS).map {|x|
           (x.last==x.first) ? [x.first] : [x.first, x.last]
         },
-        name||Digest::MD5.hexdigest(code)
+        name
       )
     end
     
@@ -24,7 +24,7 @@ module Ruloir
       @name=name
     end
     
-    attr_reader :name
+    attr_reader :name, :static_chunks, :dynamic_chunks
     
     def c_code
       code="int *len; const char* data;\n"
@@ -44,11 +44,11 @@ module Ruloir
             code<< string_escape(elem.last)
           end
         else
-          code<< string_escape("static_#{digest}_#{i}")
-          code<< ", NULL"
+          code<< string_escape("#{name}_static_#{digest}")
+          code<< ", #{string_escape(i)}"
         end
         i+=1
-        code<< ", &data, &len);\nwrite(fd, data, len);\n"
+        code<< ", &data, &len);\nBufferedWrite(fd, data, len);\n"
       end
       
       code
